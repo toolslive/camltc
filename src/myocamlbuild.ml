@@ -34,7 +34,7 @@ let _ = dispatch & function
 	    let configure = Cmd (S[Sh evil_cmd;
 			                   A"--disable-bzip";
 			                   A"--disable-zlib";
-			                   A"--disable-shared";
+			                   (* A"--disable-shared"; *)
 			                  ]) in
 	    Seq[configure;]
       end;
@@ -66,18 +66,10 @@ let _ = dispatch & function
        otc.cmo:
        external function 'bdb_record' is not available. 
     *)
-    flag ["ocaml";"byte";"link"] (S[A"-custom";]);
-    flag ["link";](S[A"libotc.a";]);
-    (* at this point, we'll get link errors while linking:
-       otc_wrapper.c (.text+.......): undefined reference to 'tcbdbget'
-       ....
-    *)
-    flag ["ocaml";"link"](S[A(tc_home ^ "/libtokyocabinet.a")]);
-    (* 
-       at this point, we can compile 
-       test.byte 
-       test.native
-       camltc.cma 
-       camltc.a
-    *)
+    flag ["ocaml";"byte";"link"] (S[A"-custom"]);
+    flag ["ocaml";"link"](S[
+      A"-cclib";A"-lotc";
+      A"-cclib"; A"-ltokyocabinet";
+      A"-cclib"; A("-L" ^ tc_home);
+    ]);
   | _ -> ()
