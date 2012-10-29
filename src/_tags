@@ -1,0 +1,6 @@
+true: debug, annot
+true: package(oUnit)
+true: package(lwt)
+true: package(lwt.unix)
+true: package(lwt.preemptive)
+<test.*{byte,native}> : is_main

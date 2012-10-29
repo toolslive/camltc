@@ -1,0 +1,8 @@
+description = "camltc : ocaml bindings for tokyo cabinet"
+version = "1.4.47.0"
+exists_if = "camltc.cma,camltc.cmxa"
+requires = "unix, lwt, lwt.unix, lwt.preemptive"
+archive(byte) = "camltc.cma"
+archive(native) = "camltc.cmxa"
+linkopts = "libtokyocabinet.a"
+
