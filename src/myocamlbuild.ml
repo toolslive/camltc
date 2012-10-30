@@ -68,6 +68,7 @@ let _ = dispatch & function
     *)
     flag ["ocaml";"byte";"link"] (S[A"-custom"]);
     flag ["ocaml";"link"](S[
+      A"-cclib";A"-L.";
       A"-cclib";A"-lotc";
       A"-cclib"; A"-ltokyocabinet";
       A"-cclib"; A("-L" ^ tc_home);
