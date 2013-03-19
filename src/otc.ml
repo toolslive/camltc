@@ -1,6 +1,22 @@
 
 (* use Hotc for highlevel locked access *)
 
+let next_prefix prefix =
+  let next_char c =
+    let code = Char.code c + 1 in
+    match code with
+      | 256 -> Char.chr 0, true
+      | code -> Char.chr code, false in
+  let rec inner s pos =
+    let c, carry = next_char (String.get s pos) in
+    String.set s pos c;
+    match carry, pos with
+      | false, _ -> Some s
+      | true, 0 -> None
+      | true, pos -> inner s (pos - 1) in
+  let copy = String.copy prefix in
+  inner copy ((String.length copy) - 1)
+
 let prefix_match prefix k = 
   let pl = String.length prefix in
   let rec ok i = (i = pl) || (prefix.[i] = k.[i] && ok (i+1)) in
@@ -112,27 +128,27 @@ module Bdb = struct
     try
       let _ = get bdb key in
 	  true
-    with 
+    with
       | Not_found -> false
 
-  (* some remarks: normally you'll want yo use this function with a
-     first parameter. Without a first parameter the FIRST entry in
-     the prefix will be first, this is probably not very useful
-     when reverse paging *)
+
   let rev_range_entries prefix bdb first finc last_ linc max =
-    let first = match first with | None -> prefix | Some x -> prefix ^ x in
+    let first, finc = match first with
+      | None -> next_prefix prefix, false
+      | Some x -> Some (prefix ^ x), finc in
     let last_ = match last_ with | None -> "" | Some x -> prefix ^ x in
     let pl = String.length prefix in
     try with_cursor2 bdb (fun bdb cur ->
-      let () =
-        try
-          jump bdb cur first
-        with
-          | Not_found -> last bdb cur
+      let () = match first with
+        | None -> last bdb cur
+        | Some first ->
+            try
+              let () = jump bdb cur first in
+              let jumped_key = key bdb cur in
+              if (String.compare jumped_key first) > 0 or (not finc) then prev bdb cur
+            with
+              | Not_found -> last bdb cur; print_string "koekoek twas Not_found"
       in
-      let jumped_key = key bdb cur in
-      let jumped_key_prefix = String.sub jumped_key 0 pl in
-      let () = if not finc || jumped_key_prefix <> prefix then prev bdb cur in
       let rec rev_e_loop acc count =
         if count = max then acc
         else
