@@ -8,8 +8,8 @@ let next_prefix prefix =
       | 256 -> Char.chr 0, true
       | code -> Char.chr code, false in
   let rec inner s pos =
-    let c, carry = next_char (String.get s pos) in
-    String.set s pos c;
+    let c, carry = next_char s.[pos] in
+    s.[pos] <- c;
     match carry, pos with
       | false, _ -> Some s
       | true, 0 -> None
@@ -147,37 +147,33 @@ module Bdb = struct
               let jumped_key = key bdb cur in
               if (String.compare jumped_key first) > 0 or (not finc) then prev bdb cur
             with
-              | Not_found -> last bdb cur; print_string "koekoek twas Not_found"
+              | Not_found -> last bdb cur
       in
       let rec rev_e_loop acc count =
         if count = max then acc
         else
           let key, value = record bdb cur in
           let l = String.length key in
-          (* make sure we have a key length long enough to contain the prefix *)
-          if l < pl then acc
+          if not (prefix_match prefix key) then
+            acc
           else
-            (* make sure the prefix is still the wanted prefix *)
-            let prefix2 = String.sub key 0 pl in
-            if prefix2 <> prefix then acc
+            let key2 = String.sub key pl (l-pl) in
+            if last_ = key then
+              if linc then (key2,value)::acc else acc
+            else if last_ > key then acc
             else
-              let key2 = String.sub key pl (l-pl) in
-              if last_ = key then
-                if linc then (key2,value)::acc else acc
-              else if last_ > key then acc
-              else
-                let acc = (key2,value)::acc in
-                let maybe_next =
-                  try
-                    let () = prev bdb cur in
-                    None
-                  with
-                    | Not_found ->
+              let acc = (key2,value)::acc in
+              let maybe_next =
+                try
+                  let () = prev bdb cur in
+                  None
+                with
+                  | Not_found ->
                       Some acc
-                in
-                match maybe_next with
-                  | Some acc -> acc
-                  | None -> rev_e_loop acc (count+1)
+              in
+              match maybe_next with
+                | Some acc -> acc
+                | None -> rev_e_loop acc (count+1)
       in
       rev_e_loop [] 0
     )
