@@ -3,7 +3,7 @@ open Ocamlbuild_plugin
 open Unix
 
 let run_and_read = Ocamlbuild_pack.My_unix.run_and_read
-let tc_home ="3rd-party/tokyocabinet-1.4.47"
+let tc_home ="3rd-party/tokyocabinet-1.4.48"
 
 let _ = dispatch & function
   | After_rules ->

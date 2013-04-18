@@ -39,6 +39,7 @@ module Hotc : sig
   val read : t -> (bdb -> 'b Lwt.t) -> 'b Lwt.t
   val optimize : t -> unit Lwt.t
   val defrag : t -> int Lwt.t
+  val sync :t -> unit Lwt.t
   val close : t -> unit Lwt.t
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
 end
