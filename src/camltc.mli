@@ -32,7 +32,7 @@ module Hotc : sig
   type bdb = Bdb.bdb
   type bdbcur = Bdb.bdbcur
   val filename : t -> string
-  val create : ?mode:int -> string -> t Lwt.t 
+  val create : ?mode:int -> string -> Otc.Bdb.opt list -> t Lwt.t 
   val get_bdb: t -> bdb
   val transaction :  t ->  (bdb -> 'd Lwt.t) -> 'd Lwt.t
   val with_cursor : bdb -> (bdb -> bdbcur -> 'a Lwt.t) -> 'a Lwt.t

@@ -9,7 +9,7 @@ module Hotc : sig
   val batch : t -> int -> string -> string option -> (string * string) list Lwt.t
   val get_bdb : t -> bdb
   val read : t -> (bdb -> 'b Lwt.t) -> 'b Lwt.t
-  val create: ?mode:int -> string -> t Lwt.t
+  val create: ?mode:int -> string -> Otc.Bdb.opt list -> t Lwt.t
   val delete: t -> unit Lwt.t
   val optimize: t -> unit Lwt.t
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
