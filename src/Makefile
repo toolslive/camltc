@@ -12,9 +12,9 @@ install:
 	  _build/camltc.cmxa \
 	  _build/camltc.cmi \
 	  _build/camltc.mli \
-          _build/libotc.a \
+	  _build/libotc.a \
 	  _build/camltc.a \
-          _build/3rd-party/tokyocabinet-1.4.48/libtokyocabinet.a 
+	  _build/3rd-party/tokyocabinet-*/libtokyocabinet.a 
 
 
 uninstall:
