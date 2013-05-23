@@ -26,6 +26,10 @@ module Bdb : sig
     
   val key: bdb -> bdbcur -> string
   val value: bdb -> bdbcur -> string
+
+  val _tranbegin: bdb -> unit
+  val _trancommit: bdb -> unit
+  val _tranabort: bdb -> unit
 end
 
 module Hotc : sig 
