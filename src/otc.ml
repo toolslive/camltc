@@ -189,4 +189,15 @@ module Bdb = struct
     with
       | Not_found -> []
 
+
+  external _flags : bdb -> int = "bdb_flags"
+  type flag = BDBFOPEN | BDBFFATAL
+
+  let flags bdb =
+    let f = _flags bdb in
+    List.fold_left
+      (fun acc (s, c) -> if f land c <> 0 then s :: acc else acc)
+      []
+      (* Shifts taken from tcbdb.h and tchdb.h *)
+      [(BDBFOPEN, 1 lsl 0); (BDBFFATAL, 1 lsl 1)]
 end

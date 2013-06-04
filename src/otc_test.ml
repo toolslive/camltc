@@ -89,6 +89,10 @@ let test_null db =
   let () = eq_int "char0" 0 (int_of_char str2.[4]) in
     ()
 
+let test_flags db =
+  match Bdb.flags db with
+    | [Bdb.BDBFOPEN] -> ()
+    | _ -> assert_failure "Unexpected flags set"
 
 let suite =
   let wrap f = bracket setup_tc f teardown_tc in
@@ -102,4 +106,5 @@ let suite =
       "unknown" >:: wrap test_unknown;
       "prefix_keys" >:: wrap test_prefix_keys;
       "null" >:: wrap test_null;
+      "flags" >:: wrap test_flags;
     ]

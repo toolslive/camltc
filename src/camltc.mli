@@ -30,6 +30,9 @@ module Bdb : sig
   val _tranbegin: bdb -> unit
   val _trancommit: bdb -> unit
   val _tranabort: bdb -> unit
+
+  type flag = BDBFOPEN | BDBFFATAL
+  val flags: bdb -> flag list
 end
 
 module Hotc : sig 
