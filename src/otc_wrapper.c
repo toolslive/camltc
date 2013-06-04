@@ -473,3 +473,10 @@ void bdb_tune(value bdb, /* value lmemb, value nmemb, value bnum, value apow, va
 
   CAMLreturn0;
 }
+
+value bdb_flags(value bdb)
+{
+  CAMLparam1(bdb);
+  uint8_t flags = tcbdbflags(Bdb_val(bdb));
+  CAMLreturn(Val_int(flags));
+}
