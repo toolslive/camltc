@@ -107,6 +107,14 @@ void bdb_delete(value bdb)
   CAMLreturn0;
 }
 
+void bdb_setcache(value bdb, value lcnum, value ncnum){
+    CAMLparam3(bdb,lcnum,ncnum);// not needed?
+    if (!tcbdbsetcache(Bdb_val(bdb), Int_val(lcnum), Int_val(ncnum))){
+        bdb_handle_error(Bdb_val(bdb));
+    }
+    CAMLreturn0;
+}
+
 void bdb_dbopen(value bdb, value filename, value mode)
 {
   CAMLparam3(bdb, filename, mode);
@@ -438,7 +446,7 @@ bdb_range_bytecode( value * argv, int argn )
 }
 
 
-value bdb_optimize(value bdb) 
+value bdb_optimize(value bdb)
 {
   CAMLparam1(bdb);
   int res = tcbdboptimize(Bdb_val(bdb), 0, 0, 0, -1, -1, UINT8_MAX);

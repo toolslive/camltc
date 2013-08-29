@@ -1,4 +1,3 @@
-
 (* use Hotc for highlevel locked access *)
 
 let next_prefix prefix =
@@ -17,7 +16,7 @@ let next_prefix prefix =
   let copy = String.copy prefix in
   inner copy ((String.length copy) - 1)
 
-let prefix_match prefix k = 
+let prefix_match prefix k =
   let pl = String.length prefix in
   let rec ok i = (i = pl) || (prefix.[i] = k.[i] && ok (i+1)) in
   String.length k >= pl && ok 0
@@ -25,7 +24,7 @@ let prefix_match prefix k =
 module Bdb = struct
 
   type bdb (* type stays abstract *)
-  
+
   let oreader = 1
   let owriter = 2
   let ocreat  = 4
@@ -33,10 +32,10 @@ module Bdb = struct
   let onolck  = 16
   let olcknb  = 32
   let otsync  = 64
-  
+
   let default_mode = (oreader lor owriter lor ocreat lor olcknb)
   let readonly_mode = (oreader lor onolck)
-  
+
   type bdbcur (* type stays abstract *)
 
   external first: bdb -> bdbcur -> unit = "bdb_first"
@@ -88,6 +87,8 @@ module Bdb = struct
   external bdb_defrag: bdb -> int = "bdb_defrag"
   external get_key_count: bdb -> int64 = "bdb_key_count"
 
+  external setcache: bdb -> int -> int -> unit = "bdb_setcache"
+
   type opt = BDBTLARGE
   external _tune : bdb -> (* int -> int -> int -> int -> int -> *) int -> unit = "bdb_tune"
   let tune bdb opts =
@@ -109,22 +110,22 @@ module Bdb = struct
         raise exn
 
 
-  let delete_prefix bdb prefix = 
+  let delete_prefix bdb prefix =
     let count = ref 0 in
-    with_cursor2 bdb 
+    with_cursor2 bdb
       (fun bdb cur ->
         try
           let () = jump bdb cur prefix in
-          let rec step () =  
+          let rec step () =
             let jumped_key = key bdb cur in
-            if prefix_match prefix jumped_key 
-            then 
+            if prefix_match prefix jumped_key
+            then
               let () = cur_out bdb cur in (* and jump to next *)
               let () = incr count in
-              step () 
-            else 
+              step ()
+            else
               ()
-                
+
           in
           step ()
         with

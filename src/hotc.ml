@@ -36,13 +36,19 @@ module Hotc = struct
 
   let _sync_lwt t = Lwt.return (_sync t)
 
-  let create ?(mode=Bdb.default_mode) filename opts =
+  let _setcache t lcnum ncnum = Bdb.setcache t.bdb lcnum ncnum
+
+  let create ?(mode=Bdb.default_mode)
+      ?(lcnum = 1024)
+      ?(ncnum = 512)
+      filename opts =
     let res = {
       filename = filename;
       bdb = Bdb._make ();
       mutex = Lwt_mutex.create ();
     } in
     _do_locked res (fun () ->
+      let () = Bdb.setcache res.bdb lcnum ncnum in
       Bdb.tune res.bdb opts;
       _open res mode;
       Lwt.return ()) >>= fun () ->
@@ -58,23 +64,23 @@ module Hotc = struct
 
   let filename t = t.filename
 
-  let optimize t = 
+  let optimize t =
     Lwt_preemptive.detach (
-      fun() -> 
-        Lwt.ignore_result( Lwt_log.debug "Optimizing database" ); 
+      fun() ->
+        Lwt.ignore_result( Lwt_log.debug "Optimizing database" );
         Bdb.bdb_optimize t.bdb
     ) ()
 
-  let defrag t = 
-    _do_locked t (fun () -> let r = Bdb.bdb_defrag t.bdb in 
+  let defrag t =
+    _do_locked t (fun () -> let r = Bdb.bdb_defrag t.bdb in
                             Lwt.return r)
-    
+
   let reopen t when_closed mode=
     _do_locked t
       (fun () ->
-	_close_lwt t >>= fun () ->
-	when_closed () >>= fun () ->
-	_open_lwt  t mode
+        _close_lwt t >>= fun () ->
+        when_closed () >>= fun () ->
+        _open_lwt  t mode
       )
 
   let _delete t =
