@@ -136,10 +136,75 @@ module Bdb = struct
 
   let exists bdb key =
     try
-      let _ = get bdb key in
-	  true
+      let _ = get bdb key in true
     with
       | Not_found -> false
+
+  let range_entries prefix bdb first finc last_ linc max =
+    let pl = String.length prefix in
+    let first,finc  = match first with
+      | Some x -> prefix ^ x, finc
+      | None   -> prefix, false
+    in
+    let kvs =
+      try with_cursor2 bdb
+            (fun bdb cur ->
+              let last_,linc = match last_ with
+                | None   ->
+                  begin
+                    match next_prefix prefix with
+                    | Some p -> p, false
+                    | None   -> let () = last bdb cur in
+                                let p = key bdb cur in
+                                p, false
+                  end
+                | Some x -> prefix ^x, linc
+              in
+
+              let () = jump bdb cur first in
+              let jumped_key = key bdb cur in
+              let () =
+                if String.compare jumped_key first = 0 &&
+                  (not finc)
+                then next bdb cur;
+              in
+              let rec loop acc count =
+                if count = max
+                then acc
+                else
+                  let key, value = record bdb cur in
+                  let comp = String.compare key last_ in
+                  if comp = 0
+                  then
+                    if linc
+                    then
+                      let l = String.length key in
+                      let key2 = String.sub key pl (l - pl) in
+                      (key2, value) :: acc
+                    else
+                      acc
+                  else
+                    if comp = 1
+                    then acc
+                    else
+                      begin
+                        let l = String.length key in
+                        let key2 = String.sub key pl (l - pl) in
+                        let acc' = (key2,value) :: acc in
+                        let have_next =
+                          try let () = next bdb cur in true with Not_found -> false
+                        in
+                        if have_next
+                        then loop acc' (count+1)
+                        else acc'
+                      end
+              in
+              loop [] 0
+            )
+      with Not_found -> []
+    in
+    Array.of_list (List.rev kvs)
+
 
 
   let rev_range_entries prefix bdb first finc last_ linc max =

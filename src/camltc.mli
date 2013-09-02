@@ -7,10 +7,22 @@ module Bdb : sig
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
   val out: bdb -> string -> unit
-  val range: bdb -> string option -> bool -> string option -> bool -> int -> string array
+  val range: bdb ->
+    string option -> bool ->
+    string option -> bool -> int ->
+    string array
+
+
   val exists : bdb -> string -> bool
   val delete_prefix : bdb -> string -> int
   val prefix_keys: bdb -> string -> int -> string array
+
+
+  val range_entries : string ->
+    bdb ->
+    string option -> bool ->
+    string option -> bool -> int ->
+    (string * string) array
 
   val rev_range_entries:
     string ->

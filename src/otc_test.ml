@@ -44,21 +44,59 @@ let test_cursor db =
   let _ = Bdb.next db cur in
   let _ = eq_string "key3" "key3" (Bdb.key db cur) in
   let _ = eq_string "value3" "value3" (Bdb.value db cur) in
-  let _ = try Bdb.next db cur; assert_failure "expecting failure" with _ -> () 
+  let _ = try Bdb.next db cur; assert_failure "expecting failure" with _ -> ()
   in
   let _ = Bdb._cur_delete cur in
   ()
 
+let load db kvs = List.iter (fun (k,v) -> Bdb.put db k v) kvs
+
 let test_range db =
-  Bdb.put db "kex1" "value1";
-  Bdb.put db "key2" "value2";
-  Bdb.put db "key3" "value3";
-  Bdb.put db "kez3" "value4";
+  let () = load db [
+    "kex1","value1";
+    "key2","value2";
+    "key3","value3";
+    "kez3","value4";
+  ]
+  in
   let a = Bdb.range db (Some "key") true (Some "kez") false (-1) in
-  let _ = eq_int "num==2" 2 (Array.length a) in
-  let _ = eq_string "key2" "key2" a.(0) in
-  let _ = eq_string "key3" "key3" a.(1) in
-    ()
+  let () = eq_int "num==2" 2 (Array.length a) in
+  let () = eq_string "key2" "key2" a.(0) in
+  let () = eq_string "key3" "key3" a.(1) in
+  ()
+
+
+
+let test_range_entries db =
+  let () = load db
+    [ "@kex1", "value1";
+      "@key2", "value2";
+      "@key3", "value3";
+      "@kez3", "value4"]
+  in
+  let a = Bdb.range_entries "@" db (Some "key") true (Some "kez") false (-1)
+  in
+  let () = eq_int "num==2" 2( Array.length a) in
+  let key i = fst (a.(i)) in
+  let () = eq_string "key2" "key2" (key 0) in
+  let () = eq_string "key3" "key3" (key 1) in
+  ()
+
+let test_range_entries2 db =
+ let () = load db
+    [ "@kex1", "value1";
+      "@key2", "value2";
+      "@key3", "value3";
+      "@kez3", "value4"]
+  in
+  let a = Bdb.range_entries "@" db (Some "key") true (Some "key3") false (-1)
+  in
+  let () = eq_int "num==1" 1 ( Array.length a) in
+  let key i = fst (a.(i)) in
+  let () = eq_string "key2" "key2" (key 0) in
+  ()
+
+
 
 let test_unknown db =
   let _ = try Bdb.get db "hello" with
@@ -67,14 +105,16 @@ let test_unknown db =
   in ()
 
 let test_prefix_keys db =
-  let _ = Bdb.put db "kex1" "value1" in
-  let _ = Bdb.put db "key2" "value2" in
-  let _ = Bdb.put db "key3" "value3" in
-  let _ = Bdb.put db "kez3" "value4" in
+  let () = load db [
+    "kex1", "value1";
+    "key2", "value2";
+    "key3", "value3";
+    "kez3", "value4"]
+  in
   let a = Bdb.prefix_keys db "key" (-1) in
-  let _ = eq_int "num==2" 2 (Array.length a) in
-  let _ = eq_string "key2" "key2" a.(0) in
-  let _ = eq_string "key3" "key3" a.(1) in
+  let () = eq_int "num==2" 2 (Array.length a) in
+  let () = eq_string "key2" "key2" a.(0) in
+  let () = eq_string "key3" "key3" a.(1) in
     ()
 
 let test_null db =
@@ -107,4 +147,6 @@ let suite =
       "prefix_keys" >:: wrap test_prefix_keys;
       "null" >:: wrap test_null;
       "flags" >:: wrap test_flags;
+      "range_entries" >:: wrap test_range_entries;
+      "range_entries2" >:: wrap test_range_entries2;
     ]
