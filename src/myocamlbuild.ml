@@ -33,7 +33,7 @@ let make_version _ _ =
     in
     let major,minor,patch =
       try
-        Scanf.sscanf tag_version "%i.%i.%i" (fun ma mi p -> (ma,mi,p))
+        Scanf.sscanf tag_version "camltc-%i.%i.%i" (fun ma mi p -> (ma,mi,p))
       with _ ->
         try Scanf.sscanf branch_version "heads/%i.%i" (fun ma mi -> (ma,mi,-1))
         with _ ->
