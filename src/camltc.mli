@@ -1,3 +1,12 @@
+val git_revision: string
+val compile_time: string
+val machine:string
+val major:int
+val minor:int
+val patch:int
+val dependencies: string
+
+
 module Bdb : sig
   type bdb
   type bdbcur

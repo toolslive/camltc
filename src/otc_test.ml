@@ -94,6 +94,11 @@ let test_range_entries2 db =
   let () = eq_int "num==1" 1 ( Array.length a) in
   let key i = fst (a.(i)) in
   let () = eq_string "key2" "key2" (key 0) in
+  (* None at end *)
+  let b = Bdb.range_entries "@" db (Some "key") true None false (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 3 (Array.length b) in
+  let c = Bdb.range_entries "@" db None true None false (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 4 (Array.length c) in
   ()
 
 
