@@ -453,11 +453,12 @@ value bdb_optimize(value bdb)
   CAMLreturn(res?Val_true:Val_false);
 }
 
-value bdb_defrag(value bdb){
-  CAMLparam1(bdb);
+value bdb_defrag(value bdb, value step){
+  CAMLparam2(bdb, step);
   //printf("otc_wrapper: bdb_defrag\n");
   TCBDB* tcbdb = Bdb_val(bdb);
-  int res = !tcbdbdefrag(tcbdb, INT64_MAX);
+  int64_t cstep = Int64_val(step);
+  int res = !tcbdbdefrag(tcbdb, cstep);
   //printf("otc_wrapper: bdb_defrag=>%i\n",res);
   if (res){
     bdb_handle_error(tcbdb);
