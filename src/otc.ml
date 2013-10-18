@@ -84,7 +84,9 @@ module Bdb = struct
   external prefix_keys: bdb -> string -> int -> string array = "bdb_prefix_keys"
   external bdb_optimize: bdb -> unit = "bdb_optimize"
 
-  external bdb_defrag: bdb -> int = "bdb_defrag"
+  external _bdb_defrag: bdb -> int64 -> int = "bdb_defrag"
+  let defrag ?(step=Int64.max_int) bdb = _bdb_defrag bdb step
+
   external get_key_count: bdb -> int64 = "bdb_key_count"
 
   external setcache: bdb -> int -> int -> unit = "bdb_setcache"

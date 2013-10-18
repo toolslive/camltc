@@ -16,5 +16,5 @@ module Hotc : sig
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
   val sync : t -> unit Lwt.t
   val close : t -> unit Lwt.t
-  val defrag : t -> int Lwt.t
+  val defrag : ?step:int64 -> t -> int Lwt.t
 end

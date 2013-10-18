@@ -45,13 +45,13 @@ let make_version _ _ =
     Printf.sprintf template git_revision time machine major minor patch
       (String.concat "\\n" dependencies)
   in
-  Cmd (S [A "echo"; Quote(Sh cmd); Sh ">"; P "version.ml"])
+  Cmd (S [A "echo"; Quote(Sh cmd); Sh ">"; P "camltc_version.ml"])
 
 
 
 let _ = dispatch & function
   | After_rules ->
-    rule "version.ml" ~prod: "version.ml" make_version;
+    rule "camltc_version.ml" ~prod: "camltc_version.ml" make_version;
     rule "Extract .tar.gz"
       ~dep:"3rd-party/%(f).tar.gz"
       ~stamp:"3rd-party/%(f).extracted"

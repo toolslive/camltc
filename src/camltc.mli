@@ -54,6 +54,8 @@ module Bdb : sig
 
   type flag = BDBFOPEN | BDBFFATAL
   val flags: bdb -> flag list
+
+  val defrag : ?step:int64 -> bdb -> int
 end
 
 module Hotc : sig
@@ -70,7 +72,7 @@ module Hotc : sig
   val with_cursor : bdb -> (bdb -> bdbcur -> 'a Lwt.t) -> 'a Lwt.t
   val read : t -> (bdb -> 'b Lwt.t) -> 'b Lwt.t
   val optimize : t -> unit Lwt.t
-  val defrag : t -> int Lwt.t
+  val defrag : ?step:int64 -> t -> int Lwt.t
   val sync :t -> unit Lwt.t
   val close : t -> unit Lwt.t
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
