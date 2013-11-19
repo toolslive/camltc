@@ -97,7 +97,22 @@ static inline value caml_copy_string_with_length(const char *str, int len)
 value bdb_make(value unit)
 {
   CAMLparam1(unit);
-  CAMLreturn(alloc_bdb(tcbdbnew()));
+
+  TCBDB *bdb = tcbdbnew();
+
+  if(bdb == NULL) {
+    caml_failwith("tcbdbnew returned NULL");
+  }
+
+  if(!tcbdbsetmutex(bdb)) {
+    /* Note: don't use bdb_handle_error, otherwise `bdb` is leaked */
+    int code = tcbdbecode(bdb);
+
+    tcbdbdel(bdb);
+    caml_failwith(tcbdberrmsg(code));
+  }
+
+  CAMLreturn(alloc_bdb(bdb));
 }
 
 void bdb_delete(value bdb)
