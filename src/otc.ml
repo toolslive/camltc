@@ -210,103 +210,127 @@ module Bdb = struct
             end in
         loop (initial, true))
 
+  type upper_border =
+  | BKey of string * include_key
+  | BOmega
+
+  let range_ascending
+      bdb (first : string) finc (last_ : upper_border)
+      accumulate initial =
+    let comp key =
+      match last_ with
+      | BOmega ->
+        true
+      | BKey (last_, linc) ->
+        let r = String.compare key last_ in
+        if r = 0
+        then
+          linc
+        else if r = 1
+        then
+          false
+        else
+          true in
+    range'
+      bdb
+      (Key (first, finc, Ascending))
+      (fun ((key, value) as kv) acc ->
+        if comp key
+        then
+          accumulate kv acc
+        else
+          (acc, false))
+      initial
+
+  let range_descending
+      bdb (first : upper_border) (last_ : string) linc
+      accumulate initial =
+    let comp key =
+      let r = String.compare key last_ in
+      if r = 0
+      then
+        linc
+      else if r = 1
+      then
+        true
+      else
+        false in
+    range'
+      bdb
+      (match first with
+      | BOmega ->
+        OmegaDescending
+      | BKey (k, inc) ->
+        Key (k, inc, Descending))
+      (fun ((key, value) as kv) acc ->
+        if comp key
+        then
+          accumulate kv acc
+        else
+          (acc, false))
+      initial
+
   let range_entries prefix bdb first finc last_ linc max =
-    let pl = String.length prefix in
     let first  = match first with
       | Some x -> prefix ^ x
       | None   -> prefix in
-    let comp key =
-      match last_ with
+    let last_ = match last_ with
       | None ->
-        -1
+        begin
+          match next_prefix prefix with
+          | None ->
+            BOmega
+          | Some nprefix ->
+            BKey (nprefix, false)
+        end
       | Some x ->
-        String.compare key (prefix ^ x) in
+        BKey ((prefix ^ x), linc) in
+    let pl = String.length prefix in
     let _, result =
-      range'
+      range_ascending
         bdb
-        (Key (first, finc, Ascending))
+        first
+        finc
+        last_
         (fun (key, value) (count, result) ->
-          let return include_kv continue =
-            if include_kv
-            then
-              let l = String.length key in
-              let key2 = String.sub key pl (l - pl) in
-              let result' = (key2, value) :: result in
-              ((count + 1, result'), continue)
-            else
-              ((count, result), continue) in
           if count = max
           then
-            return false false
+            ((count, result), false)
           else
-            begin
-              let comp' = comp key in
-              if comp' = 0
-              then
-                return linc false
-              else if comp' = 1
-              then
-                return false false
-              else (* comp' = -1 *)
-                return true true
-            end)
+            let l = String.length key in
+            let key2 = String.sub key pl (l - pl) in
+            ((count + 1, (key2, value) :: result)), true)
         (0, []) in
     Array.of_list (List.rev result)
 
   let rev_range_entries prefix bdb first finc last_ linc max =
     let pl = String.length prefix in
-    let last_ = match last_ with
-      | None -> ""
-      | Some x -> prefix ^ x in
-    let start_and_direction =
-      match first with
-      | None ->
-        begin
-          match next_prefix prefix with
-          | None ->
-            OmegaDescending
-          | Some x ->
-            Key (x, false, Descending)
-        end
-      | Some x ->
-        Key (prefix ^ x, finc, Descending) in
     let _, result =
-      range'
+      range_descending
         bdb
-        start_and_direction
+        (match first with
+        | None ->
+          begin
+            match next_prefix prefix with
+            | None ->
+              BOmega
+            | Some x ->
+              BKey (x, false)
+          end
+        | Some x ->
+          BKey (prefix ^ x, finc))
+        (match last_ with
+        | None -> prefix
+        | Some x -> prefix ^ x)
+        linc
         (fun (key, value) (count, result) ->
-          let l = String.length key in
-          let return include_kv continue =
-            if include_kv
-            then
-              let key2 = String.sub key pl (l - pl) in
-              let result' = (key2, value) :: result in
-              ((count + 1, result'), continue)
-            else
-              ((count, result), continue) in
           if count = max
           then
-            return false false
+            ((count, result), false)
           else
-            begin
-              if not (prefix_match prefix key) then
-                return false false
-              else
-                if last_ = key
-                then
-                  begin
-                    if linc
-                    then
-                      return true false
-                    else
-                      return false false
-                  end
-                else if last_ > key
-                then
-                  return false false
-                else
-                  return true true
-            end)
+            let l = String.length key in
+            let key2 = String.sub key pl (l - pl) in
+            ((count + 1, (key2, value) :: result)), true)
         (0, []) in
     result
 
