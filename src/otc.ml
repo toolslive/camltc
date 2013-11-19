@@ -213,7 +213,10 @@ module Bdb = struct
     let first, finc = match first with
       | None -> next_prefix prefix, false
       | Some x -> Some (prefix ^ x), finc in
-    let last_ = match last_ with | None -> "" | Some x -> prefix ^ x in
+    let last_ = match last_ with
+      | None -> ""
+      | Some x -> prefix ^ x
+    in
     let pl = String.length prefix in
     try with_cursor2 bdb (fun bdb cur ->
       let () = match first with
@@ -222,7 +225,8 @@ module Bdb = struct
             try
               let () = jump bdb cur first in
               let jumped_key = key bdb cur in
-              if (String.compare jumped_key first) > 0 or (not finc) then prev bdb cur
+              if (String.compare jumped_key first) > 0 || (not finc)
+              then prev bdb cur
             with
               | Not_found -> last bdb cur
       in
