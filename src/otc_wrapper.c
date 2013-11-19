@@ -30,6 +30,7 @@ If not, see <http://www.gnu.org/licenses/>.
 #include <caml/memory.h>
 #include <caml/custom.h>
 #include <caml/fail.h>
+#include <caml/threads.h>
 
 #include "tcbdb.h"
 
@@ -473,7 +474,11 @@ value bdb_defrag(value bdb, value step){
   //printf("otc_wrapper: bdb_defrag\n");
   TCBDB* tcbdb = Bdb_val(bdb);
   int64_t cstep = Int64_val(step);
-  int res = !tcbdbdefrag(tcbdb, cstep);
+
+  caml_enter_blocking_section();
+    int res = !tcbdbdefrag(tcbdb, cstep);
+  caml_leave_blocking_section();
+
   //printf("otc_wrapper: bdb_defrag=>%i\n",res);
   if (res){
     bdb_handle_error(tcbdb);
