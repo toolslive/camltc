@@ -8,10 +8,20 @@ val dependencies: string
 
 
 module Bdb : sig
+  module OpenMode : sig
+    type t = OREADER
+           | OWRITER
+           | OCREAT
+           | OTRUNC
+           | ONOLCK
+           | OLCKNB
+           | OTSYNC
+  end
+
   type bdb
   type bdbcur
-  val default_mode : int
-  val readonly_mode : int
+  val default_mode : OpenMode.t list
+  val readonly_mode : OpenMode.t list
   type opt = BDBTLARGE
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
@@ -63,7 +73,7 @@ module Hotc : sig
   type bdb = Bdb.bdb
   type bdbcur = Bdb.bdbcur
   val filename : t -> string
-  val create : ?mode:int ->
+  val create : ?mode:Bdb.OpenMode.t list ->
     ?lcnum:int ->
     ?ncnum:int ->
     string -> Bdb.opt list -> t Lwt.t
@@ -75,5 +85,5 @@ module Hotc : sig
   val defrag : ?step:int64 -> t -> int Lwt.t
   val sync :t -> unit Lwt.t
   val close : t -> unit Lwt.t
-  val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
+  val reopen: t -> (unit -> unit Lwt.t) -> Bdb.OpenMode.t list -> unit Lwt.t
 end

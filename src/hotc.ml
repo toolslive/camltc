@@ -22,7 +22,7 @@ module Hotc = struct
       (fun e -> Lwt.fail e)
 
   let _open t mode =
-    Bdb._dbopen t.bdb t.filename mode
+    Bdb.dbopen t.bdb t.filename mode
 
   let _open_lwt t mode = Lwt.return (_open t mode )
 
