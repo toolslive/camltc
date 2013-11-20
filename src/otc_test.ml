@@ -5,7 +5,7 @@ open Extra
 
 let setup_tc _ =
   let db = Bdb._make () in
-  let _ = Bdb._dbopen db "/tmp/db1.tc" (Bdb.owriter lor Bdb.ocreat lor Bdb.otrunc) in
+  let _ = Bdb.dbopen db "/tmp/db1.tc" Bdb.OpenMode.([OWRITER; OCREAT; OTRUNC]) in
     db
 
 let teardown_tc db =

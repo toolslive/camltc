@@ -22,19 +22,31 @@ let prefix_match prefix k =
   String.length k >= pl && ok 0
 
 module Bdb = struct
+  module OpenMode = struct
+    type t = OREADER
+           | OWRITER
+           | OCREAT
+           | OTRUNC
+           | ONOLCK
+           | OLCKNB
+           | OTSYNC
+
+    let to_int = function
+      | OREADER -> 1 lsl 0
+      | OWRITER -> 1 lsl 1
+      | OCREAT -> 1 lsl 2
+      | OTRUNC -> 1 lsl 3
+      | ONOLCK -> 1 lsl 4
+      | OLCKNB -> 1 lsl 5
+      | OTSYNC -> 1 lsl 6
+  end
 
   type bdb (* type stays abstract *)
 
-  let oreader = 1
-  let owriter = 2
-  let ocreat  = 4
-  let otrunc  = 8
-  let onolck  = 16
-  let olcknb  = 32
-  let otsync  = 64
-
-  let default_mode = (oreader lor owriter lor ocreat lor olcknb)
-  let readonly_mode = (oreader lor onolck)
+  let default_mode =
+    [OpenMode.OREADER; OpenMode.OWRITER; OpenMode.OCREAT; OpenMode.OLCKNB]
+  let readonly_mode =
+    [OpenMode.OREADER; OpenMode.ONOLCK]
 
   type bdbcur (* type stays abstract *)
 
@@ -68,6 +80,9 @@ module Bdb = struct
   external _delete: bdb -> unit = "bdb_delete"
 
   external _dbopen: bdb -> string -> int -> unit = "bdb_dbopen"
+  let dbopen bdb ~path ~mode =
+    let m = List.fold_left (fun a b -> a lor OpenMode.to_int b) 0 mode in
+    _dbopen bdb path m
   external _dbclose: bdb -> unit                 = "bdb_dbclose"
   external _dbsync: bdb -> unit                  = "bdb_dbsync"
 
