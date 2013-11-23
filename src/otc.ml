@@ -190,7 +190,8 @@ module Bdb = struct
             init_cur, prev
         end
       | OmegaDescending ->
-        last, prev in
+        last, prev
+    in
     with_cursor2 bdb
       (fun bdb cur ->
         let () = cursor_init bdb cur in
@@ -222,15 +223,14 @@ module Bdb = struct
       | BOmega ->
         true
       | BKey (last_, linc) ->
-        let r = String.compare key last_ in
-        if r = 0
-        then
-          linc
-        else if r = 1
-        then
-          false
-        else
-          true in
+        begin
+          match String.compare key last_ with
+          | 0 -> linc
+          | 1 -> false
+          | -1 -> true
+          | _ -> failwith "impossible compare result"
+        end
+    in
     range'
       bdb
       (Key (first, finc, Ascending))
@@ -246,15 +246,12 @@ module Bdb = struct
       bdb (first : upper_border) (last_ : string) linc
       accumulate initial =
     let comp key =
-      let r = String.compare key last_ in
-      if r = 0
-      then
-        linc
-      else if r = 1
-      then
-        true
-      else
-        false in
+      match String.compare key last_ with
+      | 0 -> linc
+      | 1 -> true
+      | -1 -> false
+      | _ -> failwith "impossible compare result"
+    in
     range'
       bdb
       (match first with
@@ -299,7 +296,7 @@ module Bdb = struct
           else
             let l = String.length key in
             let key2 = String.sub key pl (l - pl) in
-            ((count + 1, (key2, value) :: result)), true)
+            (count + 1, (key2, value) :: result), true)
         (0, []) in
     Array.of_list (List.rev result)
 
@@ -330,7 +327,7 @@ module Bdb = struct
           else
             let l = String.length key in
             let key2 = String.sub key pl (l - pl) in
-            ((count + 1, (key2, value) :: result)), true)
+            (count + 1, (key2, value) :: result), true)
         (0, []) in
     result
 
