@@ -24,8 +24,17 @@ module Bdb : sig
 
   val exists : bdb -> string -> bool
   val delete_prefix : bdb -> string -> int
-  val prefix_keys: bdb -> string -> int -> string array
+  val prefix_keys : bdb -> string -> int -> string array
 
+  type include_key = bool
+  type upper_border =
+  | BKey of string * include_key
+  | BOmega
+
+  val range_ascending : bdb -> string -> bool -> upper_border ->
+    ((string * string) -> 'a -> ('a * bool)) -> 'a -> 'a
+  val range_descending : bdb -> upper_border -> string -> bool ->
+    ((string * string) -> 'a -> ('a * bool)) -> 'a -> 'a
 
   val range_entries : string ->
     bdb ->

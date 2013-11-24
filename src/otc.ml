@@ -142,127 +142,198 @@ module Bdb = struct
     with
       | Not_found -> false
 
-  let range_entries prefix bdb first finc last_ linc max =
-    let pl = String.length prefix in
-    let first,finc  = match first with
-      | Some x -> prefix ^ x, finc
-      | None   -> prefix, false
-    in
-    let kvs =
-      try with_cursor2 bdb
-            (fun bdb cur ->
-              let last_,linc = match last_ with
-                | None   ->
-                  begin
-                    match next_prefix prefix with
-                    | Some p -> p, false
-                    | None   -> let () = last bdb cur in
-                                let p = key bdb cur in
-                                p, false
-                  end
-                | Some x -> prefix ^x, linc
-              in
+  type direction =
+  | Ascending
+  | Descending
 
-              let () = jump bdb cur first in
-              let jumped_key = key bdb cur in
-              let () =
-                if String.compare jumped_key first = 0 &&
-                  (not finc)
-                then next bdb cur;
-              in
-              let rec loop acc count =
-                if count = max
-                then acc
+  type include_key = bool
+
+  type start_and_direction =
+  | Key of string * include_key * direction
+  | OmegaDescending
+
+  let range'
+      bdb
+      start_key_and_direction
+      (accumulate : (string * string) -> 'a -> ('a * bool))
+      (initial : 'a) : 'a =
+    let cursor_init, move_next =
+      match start_key_and_direction with
+      | Key (start_key, include_key, dir) ->
+        begin
+          match dir with
+          | Ascending ->
+            let skip_till_start_key bdb cur =
+              try
+                jump bdb cur start_key;
+                if include_key
+                then
+                  ()
                 else
-                  let key, value = record bdb cur in
-                  let comp = String.compare key last_ in
-                  if comp = 0
-                  then
-                    if linc
-                    then
-                      let l = String.length key in
-                      let key2 = String.sub key pl (l - pl) in
-                      (key2, value) :: acc
-                    else
-                      acc
-                  else
-                    if comp = 1
-                    then acc
-                    else
-                      begin
-                        let l = String.length key in
-                        let key2 = String.sub key pl (l - pl) in
-                        let acc' = (key2,value) :: acc in
-                        let have_next =
-                          try let () = next bdb cur in true with Not_found -> false
-                        in
-                        if have_next
-                        then loop acc' (count+1)
-                        else acc'
-                      end
-              in
-              loop [] 0
-            )
-      with Not_found -> []
+                  next bdb cur
+              with Not_found ->
+                ()
+            in
+            skip_till_start_key, next
+          | Descending ->
+            let init_cur bdb cur =
+              try
+                jump bdb cur start_key;
+                if include_key
+                then
+                  ()
+                else
+                  prev bdb cur
+              with Not_found ->
+                last bdb cur
+            in
+            init_cur, prev
+        end
+      | OmegaDescending ->
+        last, prev
     in
-    Array.of_list (List.rev kvs)
+    with_cursor2 bdb
+      (fun bdb cur ->
+        let () = cursor_init bdb cur in
+        let rec loop (acc, continue) =
+          if not continue
+          then
+            acc
+          else
+            begin
+              let record_ = record bdb cur in
+              let (acc', _) as res = accumulate record_ acc in
+              try
+                let () = move_next bdb cur in
+                loop res
+              with Not_found ->
+                acc'
+            end in
+        loop (initial, true))
 
+  type upper_border =
+  | BKey of string * include_key
+  | BOmega
+
+  let range_ascending
+      bdb (first : string) finc (last_ : upper_border)
+      accumulate initial =
+    let comp key =
+      match last_ with
+      | BOmega ->
+        true
+      | BKey (last_, linc) ->
+        begin
+          match String.compare key last_ with
+          | 0 -> linc
+          | 1 -> false
+          | -1 -> true
+          | _ -> failwith "impossible compare result"
+        end
+    in
+    range'
+      bdb
+      (Key (first, finc, Ascending))
+      (fun ((key, value) as kv) acc ->
+        if comp key
+        then
+          accumulate kv acc
+        else
+          (acc, false))
+      initial
+
+  let range_descending
+      bdb (first : upper_border) (last_ : string) linc
+      accumulate initial =
+    let comp key =
+      match String.compare key last_ with
+      | 0 -> linc
+      | 1 -> true
+      | -1 -> false
+      | _ -> failwith "impossible compare result"
+    in
+    range'
+      bdb
+      (match first with
+      | BOmega ->
+        OmegaDescending
+      | BKey (k, inc) ->
+        Key (k, inc, Descending))
+      (fun ((key, value) as kv) acc ->
+        if comp key
+        then
+          accumulate kv acc
+        else
+          (acc, false))
+      initial
+
+  let range_entries prefix bdb first finc last_ linc max =
+    let first  = match first with
+      | Some x -> prefix ^ x
+      | None   -> prefix in
+    let last_ = match last_ with
+      | None ->
+        begin
+          match next_prefix prefix with
+          | None ->
+            BOmega
+          | Some nprefix ->
+            BKey (nprefix, false)
+        end
+      | Some x ->
+        BKey ((prefix ^ x), linc) in
+    let pl = String.length prefix in
+    let _, result =
+      range_ascending
+        bdb
+        first
+        finc
+        last_
+        (fun (key, value) (count, result) ->
+          if count = max
+          then
+            ((count, result), false)
+          else
+            let l = String.length key in
+            let key2 = String.sub key pl (l - pl) in
+            (count + 1, (key2, value) :: result), true)
+        (0, []) in
+    Array.of_list (List.rev result)
 
 
   let rev_range_entries prefix bdb first finc last_ linc max =
-    let first, finc = match first with
-      | None -> next_prefix prefix, false
-      | Some x -> Some (prefix ^ x), finc in
-    let last_ = match last_ with
-      | None -> ""
-      | Some x -> prefix ^ x
-    in
     let pl = String.length prefix in
-    try with_cursor2 bdb (fun bdb cur ->
-      let () = match first with
-        | None -> last bdb cur
-        | Some first ->
-            try
-              let () = jump bdb cur first in
-              let jumped_key = key bdb cur in
-              if (String.compare jumped_key first) > 0 || (not finc)
-              then prev bdb cur
-            with
-              | Not_found -> last bdb cur
-      in
-      let rec rev_e_loop acc count =
-        if count = max then acc
-        else
-          let key, value = record bdb cur in
-          let l = String.length key in
-          if not (prefix_match prefix key) then
-            acc
+    let _, result =
+      range_descending
+        bdb
+        (match first with
+        | None ->
+          begin
+            match next_prefix prefix with
+            | None ->
+              BOmega
+            | Some x ->
+              BKey (x, false)
+          end
+        | Some x ->
+          BKey (prefix ^ x, finc))
+        (match last_ with
+        | None -> prefix
+        | Some x -> prefix ^ x)
+        linc
+        (fun (key, value) (count, result) ->
+          if count = max
+          then
+            ((count, result), false)
           else
-            let key2 = String.sub key pl (l-pl) in
-            if last_ = key then
-              if linc then (key2,value)::acc else acc
-            else if last_ > key then acc
-            else
-              let acc = (key2,value)::acc in
-              let maybe_next =
-                try
-                  let () = prev bdb cur in
-                  None
-                with
-                  | Not_found ->
-                      Some acc
-              in
-              match maybe_next with
-                | Some acc -> acc
-                | None -> rev_e_loop acc (count+1)
-      in
-      rev_e_loop [] 0
-    )
-    with
-      | Not_found -> []
-
+            let l = String.length key in
+            let key2 = String.sub key pl (l - pl) in
+            (count + 1, (key2, value) :: result), true)
+        (0, []) in
+    result
 
   external _flags : bdb -> int = "bdb_flags"
+
   type flag = BDBFOPEN | BDBFFATAL
 
   let flags bdb =
