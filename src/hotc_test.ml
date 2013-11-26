@@ -243,7 +243,7 @@ let test_rev_range_entries3 db =
   let () = eq "l1" [("faa", "boo");("foo","bar")] l1 in
   Lwt.return ()
 
-let test_rev_range_entries4 db = 
+let test_rev_range_entries4 db =
   Hotc.transaction db
     (fun bdb ->
       Bdb.put bdb "key0" "value0";
@@ -257,7 +257,22 @@ let test_rev_range_entries4 db =
   let eq = eq_list (eq_tuple eq_string eq_string) in
   let () = eq  "l1" [("key0","value0");("key1","value1");("key2","value2")] l1
   in
-  Lwt.return () 
+  Lwt.return ()
+
+let load db kvs = List.iter (fun (k,v) -> Bdb.put db k v) kvs
+
+let test_rev_range_entries5 db =
+  let bdb = Hotc.get_bdb db in
+  let () = load bdb
+    [ "@kex1", "value1";
+      "@key2", "value2";
+      "@key3", "value3";
+      "@kez3", "value4"] in
+  let a = Bdb.rev_range_entries "@" bdb None false (Some "p") true (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 0 (List.length a) in
+  let b = Bdb.rev_range_entries "f" bdb None false None false (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 0 (List.length b) in
+  Lwt.return ()
 
 let test_delete_prefix db = 
   let bdb = Hotc.get_bdb db in
@@ -299,5 +314,6 @@ let suite =
       "rev_range_entries2" >:: wrap test_rev_range_entries2;
       "rev_range_entries3" >:: wrap test_rev_range_entries3;
       "rev_range_entries4" >:: wrap test_rev_range_entries4;
+      "test_rev_range_entries5" >:: wrap test_rev_range_entries5;
       "delete_prefix" >:: wrap test_delete_prefix;
     ]
