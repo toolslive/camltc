@@ -99,9 +99,11 @@ let test_range_entries2 db =
   let () = OUnit.assert_equal ~printer:string_of_int 3 (Array.length b) in
   let c = Bdb.range_entries "@" db None true None false (-1) in
   let () = OUnit.assert_equal ~printer:string_of_int 4 (Array.length c) in
+  let d = Bdb.range_entries "@" db (Some "p") true None false (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 0 (Array.length d) in
+  let e = Bdb.range_entries "f" db None false None false (-1) in
+  let () = OUnit.assert_equal ~printer:string_of_int 0 (Array.length e) in
   ()
-
-
 
 let test_unknown db =
   let _ = try Bdb.get db "hello" with
