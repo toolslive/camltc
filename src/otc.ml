@@ -170,31 +170,34 @@ module Bdb = struct
                 then
                   ()
                 else
-                  next bdb cur
+                  next bdb cur;
+                false
               with Not_found ->
-                ()
+                true (* empty *)
             in
             skip_till_start_key, next
           | Descending ->
             let init_cur bdb cur =
               try
                 jump bdb cur start_key;
-                if include_key
+                if include_key && key bdb cur = start_key
                 then
                   ()
                 else
-                  prev bdb cur
+                  prev bdb cur;
+                false
               with Not_found ->
-                last bdb cur
+                last bdb cur;
+                false
             in
             init_cur, prev
         end
       | OmegaDescending ->
-        last, prev
+        (fun bdb cur -> last bdb cur; false), prev
     in
     with_cursor bdb
       (fun bdb cur ->
-        let () = cursor_init bdb cur in
+        let isempty = cursor_init bdb cur in
         let rec loop (acc, continue) =
           if not continue
           then
@@ -209,7 +212,11 @@ module Bdb = struct
               with Not_found ->
                 acc'
             end in
-        loop (initial, true))
+        if isempty
+        then
+          initial
+        else
+          loop (initial, true))
 
   type upper_border =
   | BKey of string * include_key
