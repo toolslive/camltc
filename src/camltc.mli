@@ -50,12 +50,17 @@ module Bdb : sig
   val get_key_count : bdb -> int64
 
   val first: bdb -> bdbcur -> unit
-  val next: bdb -> bdbcur -> unit
-  val prev: bdb -> bdbcur -> unit
-  val last: bdb -> bdbcur -> unit
+  val jump : bdb -> bdbcur -> string -> unit
+  val next : bdb -> bdbcur -> unit
+  val prev : bdb -> bdbcur -> unit
+  val last : bdb -> bdbcur -> unit
+  val cur_out  : bdb -> bdbcur -> unit
+  (** [cur_out b c] deletes the current key value pair and jumps to next *)
 
   val key: bdb -> bdbcur -> string
   val value: bdb -> bdbcur -> string
+
+  val with_cursor : bdb -> (bdb -> bdbcur -> 'a) -> 'a
 
   val _tranbegin: bdb -> unit
   val _trancommit: bdb -> unit

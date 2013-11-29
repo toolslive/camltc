@@ -100,7 +100,7 @@ module Bdb = struct
     let int_of_opts = List.fold_left (fun a b -> a lor int_of_opt b) 0 in
     _tune bdb (int_of_opts opts)
 
-  let with_cursor2 bdb (f:bdb -> 'a) =
+  let with_cursor bdb (f:bdb -> 'a) =
     let cursor = _cur_make bdb in
     try
       let x = f bdb cursor in
@@ -114,7 +114,7 @@ module Bdb = struct
 
   let delete_prefix bdb prefix =
     let count = ref 0 in
-    with_cursor2 bdb
+    with_cursor bdb
       (fun bdb cur ->
         try
           let () = jump bdb cur prefix in
@@ -192,7 +192,7 @@ module Bdb = struct
       | OmegaDescending ->
         last, prev
     in
-    with_cursor2 bdb
+    with_cursor bdb
       (fun bdb cur ->
         let () = cursor_init bdb cur in
         let rec loop (acc, continue) =
