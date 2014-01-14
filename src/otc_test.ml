@@ -105,6 +105,28 @@ let test_range_entries2 db =
   let () = OUnit.assert_equal ~printer:string_of_int 0 (Array.length e) in
   ()
 
+let test_range_entries3 db =
+  let p = "O\001\000\000\000\000\000@\000\128\000\000\000\000\000\000\000" in
+  let () =
+    load db
+         [ ("@" ^ p ^ "hi3.txt", "hi3");
+           ("@" ^ p ^ "sub1/hi.txt", "sub1/hi.txt");
+           ("@" ^ p ^ "sub1/hi2.txt","sub1/hi2.txt");
+           ("@" ^ p ^ "sub2/hi2.txt","sub2/hi2.txt");
+]
+  in
+  let k = "O\001\000\000\000\000\000@\000\128\000\000\000\000\000\000\000sub2/" in
+  let a = Bdb.range_entries
+    "@" db
+    (Some k) true
+    (Some "O\002") false (-1)
+  in
+  (*Array.iter (fun (k,v) -> Printf.printf "(%S,%S)\n" k v) a; *)
+  OUnit.assert_equal 1 (Array.length a);
+  OUnit.assert_equal (p ^ "sub2/hi2.txt", "sub2/hi2.txt") a.(0);
+  ()
+
+
 let test_unknown db =
   let _ = try Bdb.get db "hello" with
     | Not_found -> ""
@@ -156,4 +178,5 @@ let suite =
       "flags" >:: wrap test_flags;
       "range_entries" >:: wrap test_range_entries;
       "range_entries2" >:: wrap test_range_entries2;
+      "range_entries3" >:: wrap test_range_entries3;
     ]

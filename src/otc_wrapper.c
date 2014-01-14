@@ -271,7 +271,11 @@ value bdb_record(value bdb, value bdbcur)
 void bdb_jump(value bdb, value bdbcur, value key)
 {
   CAMLparam3(bdb, bdbcur, key);
-  if (!tcbdbcurjump2(Bdbcur_val(bdbcur), String_val(key)))
+  const int klen = caml_string_length(key);
+  if (!tcbdbcurjump(Bdbcur_val(bdbcur),
+                    String_val(key),
+                    klen
+                     ))
     {
       bdb_handle_error(Bdb_val(bdb));
     }
