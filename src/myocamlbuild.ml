@@ -105,7 +105,10 @@ let _ = dispatch & function
       that triggers the compilation of otc_wrapper.c
       for which we need to supply tokyo cabinet headers
     *)
-    flag ["compile"; "c";"file:otc_wrapper.c"] (S[A"-ccopt";A( "-I" ^ tc_home);]);
+    flag ["compile"; "c";"file:otc_wrapper.c"]
+      (S[A"-ccopt";A( "-I" ^ tc_home);
+         A"-ccopt"; A"-O2";
+        ]);
     (*
       at this point, we'll get an error while linking:
       otc.cmo:
