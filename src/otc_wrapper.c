@@ -321,6 +321,23 @@ value bdb_get(value bdb, value key)
 {
   CAMLparam2(bdb, key);
   CAMLlocal1(res);
+  const int klen = caml_string_length(key);
+  int vlen;
+  char * v1 = tcbdbget(Bdb_val(bdb), String_val(key), klen, &vlen);
+  if (v1 == 0)
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    } else {
+    res = caml_copy_string_with_length(v1, vlen);
+    free(v1);
+  }
+  CAMLreturn(res);
+}
+
+value bdb_get_nolock(value bdb, value key)
+{
+  CAMLparam2(bdb, key);
+  CAMLlocal1(res);
 
   char *v1 = NULL;
   int vlen = 0;
