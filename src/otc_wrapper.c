@@ -91,7 +91,7 @@ static inline void bdb_handle_error(TCBDB *bdb)
 static inline value caml_copy_string_with_length(const char *str, int len)
 {
   value res = caml_alloc_string(len);
-  memmove(String_val(res), str, len);
+  memcpy(String_val(res), str, len);
   return res;
 }
 
@@ -325,6 +325,46 @@ value bdb_get(value bdb, value key)
   int vlen;
   char * v1 = tcbdbget(Bdb_val(bdb), String_val(key), klen, &vlen);
   if (v1 == 0)
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    } else {
+    res = caml_copy_string_with_length(v1, vlen);
+    free(v1);
+  }
+  CAMLreturn(res);
+}
+
+value bdb_get_nolock(value bdb, value key)
+{
+  CAMLparam2(bdb, key);
+  CAMLlocal1(res);
+
+  char *v1 = NULL;
+  int vlen = 0;
+
+  const int klen = caml_string_length(key);
+  char *largekey = NULL;
+  char smallkey[1024];
+  char *ckey = NULL;
+
+  if(klen <= sizeof(smallkey)) {
+    ckey = smallkey;
+  }
+  else {
+    largekey = caml_stat_alloc(klen);
+    ckey = largekey;
+  }
+  memcpy(ckey, String_val(key), klen);
+
+  caml_enter_blocking_section();
+    v1 = tcbdbget(Bdb_val(bdb), ckey, klen, &vlen);
+  caml_leave_blocking_section();
+
+  if(largekey != NULL) {
+    caml_stat_free(largekey);
+  }
+
+  if (v1 == NULL)
     {
       bdb_handle_error(Bdb_val(bdb));
     } else {
