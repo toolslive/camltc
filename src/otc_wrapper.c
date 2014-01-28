@@ -91,7 +91,7 @@ static inline void bdb_handle_error(TCBDB *bdb)
 static inline value caml_copy_string_with_length(const char *str, int len)
 {
   value res = caml_alloc_string(len);
-  memmove(String_val(res), str, len);
+  memcpy(String_val(res), str, len);
   return res;
 }
 
