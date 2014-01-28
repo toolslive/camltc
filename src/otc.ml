@@ -57,6 +57,7 @@ module Bdb = struct
   external out: bdb -> string -> unit = "bdb_out"
   external put: bdb -> string -> string -> unit = "bdb_put"
   external get: bdb -> string -> string = "bdb_get"
+  external get_nolock : bdb -> string -> string = "bdb_get_nolock"
   external putkeep: bdb -> string -> string -> unit = "bdb_putkeep"
 
   (* TODO: let getters return a "string option" isof throwing Not_found *)

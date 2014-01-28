@@ -15,6 +15,7 @@ module Bdb : sig
   type opt = BDBTLARGE
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
+  val get_nolock : bdb -> string -> string
   val out: bdb -> string -> unit
   val range: bdb ->
     string option -> bool ->
