@@ -530,7 +530,7 @@ value bdb_copy_from_cursor(value sbdb, value cursor, value tbdb, value count) {
 
   TCXSTR *key = NULL, *val = NULL;
 
-  bool err = false;
+  bool serr = false, terr = false;
 
   key = tcxstrnew();
   if(!key) {
@@ -546,12 +546,12 @@ value bdb_copy_from_cursor(value sbdb, value cursor, value tbdb, value count) {
   caml_enter_blocking_section();
     while(ccount != 0) {
       if(!tcbdbcurrec(ccursor, key, val)) {
-        err = tcbdbecode(csbdb) != TCENOREC;
+        serr = tcbdbecode(csbdb) != TCENOREC;
         break;
       }
 
       if(!tcbdbputdup(ctbdb, tcxstrptr(key), tcxstrsize(key), tcxstrptr(val), tcxstrsize(val))) {
-        err = true;
+        terr = true;
         break;
       }
 
@@ -559,7 +559,7 @@ value bdb_copy_from_cursor(value sbdb, value cursor, value tbdb, value count) {
       ccount--;
 
       if(!tcbdbcurnext(ccursor)) {
-        err = tcbdbecode(csbdb) != TCENOREC;
+        serr = tcbdbecode(csbdb) != TCENOREC;
         break;
       }
     }
@@ -568,7 +568,11 @@ value bdb_copy_from_cursor(value sbdb, value cursor, value tbdb, value count) {
     tcxstrdel(val);
   caml_leave_blocking_section();
 
-  if(err) {
+  if(serr) {
+    bdb_handle_error(csbdb);
+  }
+
+  if(terr) {
     bdb_handle_error(ctbdb);
   }
 
