@@ -71,6 +71,8 @@ module Bdb : sig
   val flags: bdb -> flag list
 
   val defrag : ?step:int64 -> bdb -> int
+
+  val copy_from_cursor : source:bdb -> cursor:bdbcur -> target:bdb -> max:int option -> int
 end
 
 module Hotc : sig
