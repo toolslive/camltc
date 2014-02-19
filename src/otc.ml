@@ -350,4 +350,13 @@ module Bdb = struct
       []
       (* Shifts taken from tcbdb.h and tchdb.h *)
       [(BDBFOPEN, 1 lsl 0); (BDBFFATAL, 1 lsl 1)]
+
+  external _copy_from_cursor : bdb -> bdbcur -> bdb -> int -> int = "bdb_copy_from_cursor"
+
+  let copy_from_cursor ~source ~cursor ~target ~max =
+    let count = match max with
+      | None -> -1
+      | Some i -> i
+    in
+    _copy_from_cursor source cursor target count
 end

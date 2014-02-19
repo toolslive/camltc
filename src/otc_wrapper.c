@@ -513,3 +513,64 @@ value bdb_flags(value bdb)
   uint8_t flags = tcbdbflags(Bdb_val(bdb));
   CAMLreturn(Val_int(flags));
 }
+
+
+/* Copy values from the given cursor to the given target database, up to count
+ * key-value pairs (unless count is negative, then the cursor is exhausted till the
+ * end).
+ * Returns the number of copied pairs.
+ */
+value bdb_copy_from_cursor(value sbdb, value cursor, value tbdb, value count) {
+  CAMLparam4(sbdb, cursor, tbdb, count);
+
+  int ccount = Int_val(count), done = 0;
+
+  BDBCUR *ccursor = Bdbcur_val(cursor);
+  TCBDB *csbdb = Bdb_val(sbdb), *ctbdb = Bdb_val(tbdb);
+
+  TCXSTR *key = NULL, *val = NULL;
+
+  bool err = false;
+
+  key = tcxstrnew();
+  if(!key) {
+    caml_raise_out_of_memory();
+  }
+
+  val = tcxstrnew();
+  if(!val) {
+    tcxstrdel(key);
+    caml_raise_out_of_memory();
+  }
+
+  caml_enter_blocking_section();
+    while(ccount != 0) {
+      if(!tcbdbcurrec(ccursor, key, val)) {
+        err = tcbdbecode(csbdb) != TCENOREC;
+        break;
+      }
+
+      if(!tcbdbputdup(ctbdb, tcxstrptr(key), tcxstrsize(key), tcxstrptr(val), tcxstrsize(val))) {
+        err = true;
+        break;
+      }
+
+      done++;
+      ccount--;
+
+      if(!tcbdbcurnext(ccursor)) {
+        err = tcbdbecode(csbdb) != TCENOREC;
+        break;
+      }
+    }
+
+    tcxstrdel(key);
+    tcxstrdel(val);
+  caml_leave_blocking_section();
+
+  if(err) {
+    bdb_handle_error(ctbdb);
+  }
+
+  CAMLreturn(Val_int(done));
+}
