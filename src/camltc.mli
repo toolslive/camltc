@@ -15,6 +15,7 @@ module Bdb : sig
   type opt = BDBTLARGE
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
+  val get3: bdb -> string -> string
   val get_nolock : bdb -> string -> string
   val out: bdb -> string -> unit
   val range: bdb ->
@@ -60,6 +61,8 @@ module Bdb : sig
 
   val key: bdb -> bdbcur -> string
   val value: bdb -> bdbcur -> string
+  val key3: bdb -> bdbcur -> string
+  val value3: bdb -> bdbcur -> string
 
   val with_cursor : bdb -> (bdb -> bdbcur -> 'a) -> 'a
 

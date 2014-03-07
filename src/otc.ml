@@ -44,6 +44,8 @@ module Bdb = struct
   external last: bdb -> bdbcur -> unit = "bdb_last"
   external key: bdb -> bdbcur -> string = "bdb_key"
   external value: bdb -> bdbcur -> string = "bdb_value"
+  external key3: bdb -> bdbcur -> string = "bdb_key3"
+  external value3: bdb -> bdbcur -> string = "bdb_value3"
   external record: bdb -> bdbcur -> string * string = "bdb_record"
   external jump: bdb -> bdbcur -> string -> unit = "bdb_jump"
 
@@ -57,6 +59,7 @@ module Bdb = struct
   external out: bdb -> string -> unit = "bdb_out"
   external put: bdb -> string -> string -> unit = "bdb_put"
   external get: bdb -> string -> string = "bdb_get"
+  external get3: bdb -> string -> string = "bdb_get3"
   external get_nolock : bdb -> string -> string = "bdb_get_nolock"
   external putkeep: bdb -> string -> string -> unit = "bdb_putkeep"
 

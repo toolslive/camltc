@@ -231,6 +231,21 @@ value bdb_key(value bdb, value bdbcur)
   CAMLreturn(res);
 }
 
+value bdb_key3(value bdb, value bdbcur)
+{
+  CAMLparam2(bdb, bdbcur);
+  CAMLlocal1(res);
+
+  int len = 0;
+  const void *str =tcbdbcurkey3(Bdbcur_val(bdbcur),&len);
+  if (str == 0)
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    }
+  res = caml_copy_string_with_length(str, len);
+  CAMLreturn(res);
+}
+
 value bdb_value(value bdb, value bdbcur)
 {
   CAMLparam2(bdb, bdbcur);
@@ -243,6 +258,20 @@ value bdb_value(value bdb, value bdbcur)
     }
   res = caml_copy_string_with_length(str, len);
   free(str);
+  CAMLreturn(res);
+}
+
+value bdb_value3(value bdb, value bdbcur)
+{
+  CAMLparam2(bdb, bdbcur);
+  CAMLlocal1(res);
+  int len = 0;
+  const void *str =tcbdbcurval3(Bdbcur_val(bdbcur), &len);
+  if (str == 0)
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    }
+  res = caml_copy_string_with_length(str, len);
   CAMLreturn(res);
 }
 
@@ -330,6 +359,22 @@ value bdb_get(value bdb, value key)
     } else {
     res = caml_copy_string_with_length(v1, vlen);
     free(v1);
+  }
+  CAMLreturn(res);
+}
+
+value bdb_get3(value bdb, value key)
+{
+  CAMLparam2(bdb, key);
+  CAMLlocal1(res);
+  const int klen = caml_string_length(key);
+  int vlen;
+  const void * v1 = tcbdbget3(Bdb_val(bdb), String_val(key), klen, &vlen);
+  if (v1 == 0)
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    } else {
+    res = caml_copy_string_with_length(v1, vlen);
   }
   CAMLreturn(res);
 }
