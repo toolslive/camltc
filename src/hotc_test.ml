@@ -1,3 +1,19 @@
+(*
+Copyright (2010-2014) INCUBAID BVBA
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*)
+
 open OUnit
 open Hotc
 open Otc
@@ -22,12 +38,13 @@ let test_with_cursor db =
   Hotc.transaction db
     (fun db' ->
       let () = Bdb.put db' "hello" "world" in
-      Hotc.with_cursor db'
-	(fun _ cursor ->
-	  let () = Bdb.first db' cursor in
-	  let x = Bdb.value db' cursor in
-	  Lwt.return x
-	)
+      Hotc.with_cursor
+        db'
+        (fun _ cursor ->
+         let () = Bdb.first db' cursor in
+         let x = Bdb.value db' cursor in
+         Lwt.return x
+        )
     ) >>= fun res ->
   let () = eq_string "world" res in
   Lwt.return ()
@@ -60,33 +77,35 @@ let test_transaction db =
   in
   Lwt.catch
     (fun () ->
-      Hotc.transaction db
-	(fun db ->
-	  Bdb.put db key "one";
-	  Bdb.out db bad_key;
-	  Lwt.return ()
-	)
+     Hotc.transaction
+       db
+       (fun db ->
+        Bdb.put db key "one";
+        Bdb.out db bad_key;
+        Lwt.return ()
+       )
     )
     (function
       | Not_found ->
-	Lwt_log.debug "yes, this key was not found" >>= fun () ->
-	Lwt.return ()
+         Lwt_log.debug "yes, this key was not found" >>= fun () ->
+         Lwt.return ()
       | x -> Lwt.fail x
     )
   >>= fun () ->
-Lwt.catch
-  (fun () ->
-    Hotc.transaction db
-      (fun db ->
-	let v = Bdb.get db key in
-	Lwt_io.printf "value=%s\n" v >>= fun () ->
-	OUnit.assert_failure "this is not a transaction"
-      )
-  )
-  (function
-    | Not_found -> Lwt.return ()
-    | x -> Lwt.fail x
-  )
+  Lwt.catch
+    (fun () ->
+     Hotc.transaction
+       db
+       (fun db ->
+        let v = Bdb.get db key in
+        Lwt_io.printf "value=%s\n" v >>= fun () ->
+        OUnit.assert_failure "this is not a transaction"
+       )
+    )
+    (function
+      | Not_found -> Lwt.return ()
+      | x -> Lwt.fail x
+    )
 
 
 
@@ -105,19 +124,19 @@ let test_batch db =
       begin
       Hotc.batch db 2 "VOL" (Some k2) >>= fun batch2 ->
       match batch2 with
-	| [(k3,s3);(k4,s4)] ->
-	  eq_string "ha" k1;
-	  eq_string "lo" s1;
-	  eq_string "he" k2;
-	  eq_string "pluto" s2;
-	  eq_string "hello" k3;
-	  eq_string "world" s3;
-	  eq_string "hi" k4;
-	  eq_string "mars" s4;
-	  Hotc.batch db 2 "VOL" (Some k4) >>= fun batch3 ->
-	  assert_equal batch3 [];
-	  Lwt.return ()
-	| _ -> Lwt.fail (Failure "2:got something else")
+      | [(k3,s3);(k4,s4)] ->
+         eq_string "ha" k1;
+         eq_string "lo" s1;
+         eq_string "he" k2;
+         eq_string "pluto" s2;
+         eq_string "hello" k3;
+         eq_string "world" s3;
+         eq_string "hi" k4;
+         eq_string "mars" s4;
+         Hotc.batch db 2 "VOL" (Some k4) >>= fun batch3 ->
+         assert_equal batch3 [];
+         Lwt.return ()
+      | _ -> Lwt.fail (Failure "2:got something else")
       end
     | _ -> Lwt.fail (Failure "1:got something else")
 
@@ -274,10 +293,10 @@ let test_rev_range_entries5 db =
   let () = OUnit.assert_equal ~printer:string_of_int 0 (List.length b) in
   Lwt.return ()
 
-let test_delete_prefix db = 
+let test_delete_prefix db =
   let bdb = Hotc.get_bdb db in
-  let rec fill i = 
-    if i = 100 
+  let rec fill i =
+    if i = 100
     then ()
     else
       let () = Bdb.put bdb (Printf.sprintf "my_prefix_%i"  i) "value does not matter" in
@@ -297,7 +316,7 @@ let setup () = Hotc.create "/tmp/foo.tc" []
 
 let teardown db =
   Hotc.delete db >>= fun () ->
-  let () = Unix.unlink "/tmp/foo.tc" in 
+  let () = Unix.unlink "/tmp/foo.tc" in
   Lwt.return ()
 
 let suite =
