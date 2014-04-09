@@ -60,6 +60,7 @@ module Bdb = struct
   external put: bdb -> string -> string -> unit = "bdb_put"
   external get: bdb -> string -> string = "bdb_get"
   external get3: bdb -> string -> string = "bdb_get3"
+  external get3_generic: bdb -> string -> int -> int -> string = "bdb_get3_generic"
   external get_nolock : bdb -> string -> string = "bdb_get_nolock"
   external putkeep: bdb -> string -> string -> unit = "bdb_putkeep"
 

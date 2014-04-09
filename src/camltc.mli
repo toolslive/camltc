@@ -16,6 +16,12 @@ module Bdb : sig
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
   val get3: bdb -> string -> string
+
+  val get3_generic : bdb -> string -> int -> int -> string
+  (** [get3_generic bdb s off len] considers the substring of s
+      as the key for a get3
+  *)
+
   val get_nolock : bdb -> string -> string
   val out: bdb -> string -> unit
   val range: bdb ->

@@ -379,6 +379,23 @@ value bdb_get3(value bdb, value key)
   CAMLreturn(res);
 }
 
+value bdb_get3_generic(value bdb, value key_v, value off_v, value len_v){
+    CAMLparam4(bdb, key_v,off_v, len_v);
+    CAMLlocal1(res);
+    const int off = Int_val(off_v);
+    const int len = Int_val(len_v);
+    const char* key0 = String_val(key_v);
+    const void* key = &key0[off];
+    int vlen;
+    const void* v1 = tcbdbget3(Bdb_val(bdb), key, len, &vlen);
+    if (v1 == 0){
+        bdb_handle_error(Bdb_val(bdb));
+    } else {
+        res = caml_copy_string_with_length(v1,vlen);
+    }
+    CAMLreturn(res);
+}
+
 value bdb_get_nolock(value bdb, value key)
 {
   CAMLparam2(bdb, key);

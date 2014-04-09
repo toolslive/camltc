@@ -128,6 +128,18 @@ let test_range_entries3 db =
   OUnit.assert_equal (p ^ "sub2/hi2.txt", "sub2/hi2.txt") a.(0);
   ()
 
+let test_get3_generic db =
+  let () = load db [("x","X");
+                    ("xx", "XX");
+                    ("xxx","XXX");
+                   ] in
+  let key0 = "12345xyz" in
+  let v = Bdb.get3_generic db key0 5 1 in
+  OUnit.assert_equal v "X";
+  try
+    let v = Bdb.get3_generic db key0 5 2 in
+    OUnit.assert_equal v "v"
+  with Not_found -> ()
 
 let test_unknown db =
   let _ = try Bdb.get db "hello" with
@@ -271,4 +283,5 @@ let suite =
         "6" >:: wrap2 test_copy_from_cursor_6;
         "7" >:: wrap2 test_copy_from_cursor_7;
       ];
+      "get3_generic" >:: wrap test_get3_generic
     ]
