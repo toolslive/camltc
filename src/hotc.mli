@@ -30,7 +30,7 @@ module Hotc : sig
   val delete: t -> unit Lwt.t
   val optimize: t -> unit Lwt.t
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t
-  val sync : t -> unit Lwt.t
+  val sync : ?detached:bool -> t -> unit Lwt.t
   val close : t -> unit Lwt.t
   val defrag : ?step:int64 -> t -> int Lwt.t
 end
