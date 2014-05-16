@@ -91,6 +91,7 @@ module Bdb = struct
   external _dbopen: bdb -> string -> int -> unit = "bdb_dbopen"
   external _dbclose: bdb -> unit                 = "bdb_dbclose"
   external _dbsync: bdb -> unit                  = "bdb_dbsync"
+  external _dbsync_nolock: bdb -> unit                  = "bdb_dbsync_nolock"
 
   external _cur_make: bdb -> bdbcur = "bdb_cur_make"
   external _cur_delete: bdbcur -> unit = "bdb_cur_delete"

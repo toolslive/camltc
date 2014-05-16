@@ -162,6 +162,20 @@ void bdb_dbsync(value bdb)
   CAMLreturn0;
 }
 
+void bdb_dbsync_nolock(value bdb)
+{
+  CAMLparam1(bdb);
+
+  caml_enter_blocking_section();
+    if (!tcbdbsync(Bdb_val(bdb)))
+    {
+      bdb_handle_error(Bdb_val(bdb));
+    }
+  caml_leave_blocking_section();
+
+  CAMLreturn0;
+}
+
 value bdb_cur_make(value bdb)
 {
   CAMLparam1(bdb);

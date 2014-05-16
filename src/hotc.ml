@@ -50,7 +50,13 @@ module Hotc = struct
   let _sync t =
     Bdb._dbsync t.bdb
 
+  let _sync_nolock t =
+    Bdb._dbsync_nolock t.bdb
+
   let _sync_lwt t = Lwt.return (_sync t)
+
+  let _sync_nolock_lwt t =
+    Lwt_preemptive.detach (fun () -> _sync_nolock t) ()
 
   let _setcache t lcnum ncnum = Bdb.setcache t.bdb lcnum ncnum
 
@@ -73,8 +79,11 @@ module Hotc = struct
   let close t =
     _do_locked t (fun () -> _close_lwt t)
 
-  let sync t =
-    _do_locked t (fun () -> _sync_lwt t)
+  let sync ?(detached=false) t =
+    _do_locked t (fun () ->
+                  if detached
+                  then _sync_nolock_lwt t
+                  else _sync_lwt t)
 
   let read t (f:Bdb.bdb -> 'a) = _do_locked t (fun ()-> f t.bdb)
 
