@@ -33,9 +33,8 @@ module Hotc = struct
   let get_bdb (wrapper: t) =
     wrapper.bdb
 
-  let _do_locked t f =
-    Lwt.catch (fun () -> Lwt_mutex.with_lock t.mutex f)
-              (fun e -> Lwt.fail e)
+  let do_locked t f =
+    Lwt_mutex.with_lock t.mutex f
 
   let _open t mode =
     Bdb._dbopen t.bdb t.filename mode
@@ -47,16 +46,11 @@ module Hotc = struct
 
   let _close_lwt t = Lwt.return (_close t)
 
-  let _sync t =
+  let sync t =
     Bdb._dbsync t.bdb
 
-  let _sync_nolock t =
+  let sync_nolock t =
     Bdb._dbsync_nolock t.bdb
-
-  let _sync_lwt t = Lwt.return (_sync t)
-
-  let _sync_nolock_lwt t =
-    Lwt_preemptive.detach (fun () -> _sync_nolock t) ()
 
   let _setcache t lcnum ncnum = Bdb.setcache t.bdb lcnum ncnum
 
@@ -69,7 +63,7 @@ module Hotc = struct
       bdb = Bdb._make ();
       mutex = Lwt_mutex.create ();
     } in
-    _do_locked res (fun () ->
+    do_locked res (fun () ->
                     let () = Bdb.setcache res.bdb lcnum ncnum in
                     Bdb.tune res.bdb opts;
                     _open res mode;
@@ -77,15 +71,9 @@ module Hotc = struct
     Lwt.return res
 
   let close t =
-    _do_locked t (fun () -> _close_lwt t)
+    do_locked t (fun () -> _close_lwt t)
 
-  let sync ?(detached=false) t =
-    _do_locked t (fun () ->
-                  if detached
-                  then _sync_nolock_lwt t
-                  else _sync_lwt t)
-
-  let read t (f:Bdb.bdb -> 'a) = _do_locked t (fun ()-> f t.bdb)
+  let read t (f:Bdb.bdb -> 'a) = do_locked t (fun ()-> f t.bdb)
 
   let filename t = t.filename
 
@@ -97,11 +85,11 @@ module Hotc = struct
       ) ()
 
   let defrag ?step t =
-    _do_locked t (fun () -> let r = Bdb.defrag ?step t.bdb in
+    do_locked t (fun () -> let r = Bdb.defrag ?step t.bdb in
                             Lwt.return r)
 
   let reopen t when_closed mode=
-    _do_locked t
+    do_locked t
                (fun () ->
                 _close_lwt t >>= fun () ->
                 when_closed () >>= fun () ->
@@ -115,7 +103,7 @@ module Hotc = struct
 
   let _delete_lwt t = Lwt.return(_delete t)
 
-  let delete t = _do_locked t (fun () -> _delete_lwt t)
+  let delete t = do_locked t (fun () -> _delete_lwt t)
 
   let _transaction t (f:Bdb.bdb -> 'a) =
     let bdb = t.bdb in
@@ -132,7 +120,7 @@ module Hotc = struct
 
 
   let transaction t (f:Bdb.bdb -> 'a) =
-    _do_locked t (fun () -> _transaction t f)
+    do_locked t (fun () -> _transaction t f)
 
 
   let with_cursor bdb (f:Bdb.bdb -> 'a) =
