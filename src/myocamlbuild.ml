@@ -19,7 +19,8 @@ open Ocamlbuild_plugin
 open Unix
 
 let run_and_read = Ocamlbuild_pack.My_unix.run_and_read
-let tc_home ="3rd-party/tokyocabinet-camltc-0.6.0"
+let tc_home ="3rd-party/tokyocabinet"
+let tc_source = "../" ^ tc_home
 
 let run_cmd cmd =
   try
@@ -30,7 +31,10 @@ let git_revision = run_cmd "git describe --all --long --always --dirty"
 let tag_version  = run_cmd "git describe --tags --exact-match"
 let branch_version = run_cmd "git describe --all"
 let machine = run_cmd "uname -mnrpio"
-let dependencies = ["Incubaid's tokyocabinet fork: d303368a54117e07d60836ab3b9822d4def93c22"]
+let dependencies = [
+  Printf.sprintf "Incubaid's tokyocabinet fork: %s"
+    (run_cmd "git submodule status 3rd-party/tokyocabinet")
+]
 let time =
   let tm = Unix.gmtime (Unix.time()) in
   Printf.sprintf "%02d/%02d/%04d %02d:%02d:%02d UTC"
@@ -68,30 +72,16 @@ let make_version _ _ =
 let _ = dispatch & function
   | After_rules ->
     rule "camltc_version.ml" ~prod: "camltc_version.ml" make_version;
-    rule "Extract .tar.gz"
-      ~dep:"3rd-party/%(f).tar.gz"
-      ~stamp:"3rd-party/%(f).extracted"
-      begin fun env _build ->
-        let archive = env "3rd-party/%(f).tar.gz" in
-        let () = Log.dprintf 0 "extracting %s" archive in
-        let cmd =
-          Cmd (S[(*A"echo";*)
-            A"tar";
-            A"zxvf";
-            A archive;
-            A"--directory";A"3rd-party";
-          ]) in
-        Seq[cmd;]
-      end;
 
     rule "configure 3rd-party"
-      ~dep:"3rd-party/%(dir).extracted"
+      ~dep:"3rd-party/%(dir)/configure"
       ~stamp:"3rd-party/%(dir).configured"
       begin fun env _build ->
         let dir =  env "%(dir)" in
+        let configure = env "../../../3rd-party/%(dir)/configure" in
         let () = Log.dprintf 0 "configuring %s" dir in
         let evil_cmd =
-          Printf.sprintf "cd 3rd-party/%s && ./configure " dir in
+          Printf.sprintf "mkdir -p 3rd-party/%s && cd 3rd-party/%s && %s" dir dir configure in
         let configure = Cmd (S[Sh evil_cmd;
                                A"--disable-bzip";
                                A"--disable-zlib";
@@ -107,7 +97,7 @@ let _ = dispatch & function
         let dir = env "%(dir)" in
         let () = Log.dprintf 0 "make 3rd-party %s" dir in
         let make =
-          Printf.sprintf "cd 3rd-party/%s && make" dir in
+          Printf.sprintf "make -C 3rd-party/%s" dir in
         let cmd = Cmd(Sh make) in
         Seq[cmd]
       end;
@@ -122,7 +112,7 @@ let _ = dispatch & function
       for which we need to supply tokyo cabinet headers
     *)
     flag ["compile"; "c";"file:otc_wrapper.c"]
-      (S[A"-ccopt";A( "-I" ^ tc_home);
+      (S[A"-ccopt";A( "-I" ^ tc_source);
          A"-ccopt"; A"-O2";
         ]);
     (*
