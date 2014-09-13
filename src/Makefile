@@ -1,7 +1,8 @@
 OCAML_FIND ?= ocamlfind
 
 build:
-	ocamlbuild -use-ocamlfind test.byte test.native camltc.cma camltc.cmxa camltc.a
+	ocamlbuild -use-ocamlfind test.byte test.native camltc.cma camltc.cmxa \
+	  camltc.a
 
 clean:
 	ocamlbuild -use-ocamlfind -clean
@@ -13,6 +14,7 @@ install:
 	  _build/camltc.cmi \
 	  _build/camltc.mli \
 	  _build/libotc.a \
+          _build/dllotc.so \
 	  _build/camltc.a \
 	  _build/3rd-party/tokyocabinet/libtokyocabinet.a
 
@@ -22,4 +24,3 @@ uninstall:
 
 
 default: build
-

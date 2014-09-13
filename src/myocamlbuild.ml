@@ -102,9 +102,7 @@ let _ = dispatch & function
         Seq[cmd]
       end;
 
-    flag ["ocaml";"compile";] (S[A"-thread"]);
     dep ["compile";"ocaml"][tc_home ^ ".make"];
-    flag ["link"] (S[A"-thread"]);
     (* we need libotc.a *)
     dep ["ocaml";"link";"is_main"]["libotc.a"];
     (*
@@ -120,7 +118,7 @@ let _ = dispatch & function
       otc.cmo:
       external function 'bdb_record' is not available.
     *)
-    flag ["ocaml";"byte";"link"] (S[A"-custom"]);
+    flag ["ocaml";"byte";"link"] (S[A"-dllib";A"-lotc";A"-custom"]);
     flag ["ocaml";"link"](S[
       A"-cclib";A"-L.";
       A"-cclib";A"-lotc";
