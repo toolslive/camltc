@@ -83,8 +83,15 @@ let test_range db =
   let () = eq_string "key3" "key3" a.(1) in
   ()
 
+let test_range2 db =
+  let () = load db ["xey001","XEY001"] in
+  let a = Bdb.range db None false None false (-1) in
+  let () = eq_int "length should be 1" 1 (Array.length a) in
+  let a' = Bdb.range db None false None false 0 in
+  let () = eq_int "length should be 0" 0 (Array.length a') in
+  ()
 
-
+    
 let test_range_entries db =
   let () = load db
     [ "@kex1", "value1";
@@ -282,6 +289,7 @@ let suite =
       "basic" >:: wrap test_basic;
       "cursor" >:: wrap test_cursor;
       "range" >:: wrap test_range;
+      "range2" >:: wrap test_range2;
       "unknown" >:: wrap test_unknown;
       "prefix_keys" >:: wrap test_prefix_keys;
       "null" >:: wrap test_null;

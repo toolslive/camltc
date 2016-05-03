@@ -535,7 +535,15 @@ value bdb_range_native(
 			  bks, blen, binci,
 			  eks, elen, einci,
 			  maxnumi);
-  int n = tclistnum(l);
+
+  // work around an off by 1 bug in tc (see Otc_test.test_range2):
+  int n;
+  if (maxnumi == 0){
+    n = 0;
+  } else {
+    n = tclistnum(l);
+  }
+  
   int i;
   res = caml_alloc(n, 0);
   for (i = 0; i < n; i++)
