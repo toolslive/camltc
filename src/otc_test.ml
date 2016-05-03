@@ -83,8 +83,15 @@ let test_range db =
   let () = eq_string "key3" "key3" a.(1) in
   ()
 
+let test_range2 db =
+  let () = load db ["xey001","XEY001"] in
+  let a = Bdb.range db None false None false (-1) in
+  let () = eq_int "length should be 1" 1 (Array.length a) in
+  let a' = Bdb.range db None false None false 0 in
+  let () = eq_int "length should be 0" 0 (Array.length a') in
+  ()
 
-
+    
 let test_range_entries db =
   let () = load db
     [ "@kex1", "value1";
@@ -142,6 +149,19 @@ let test_range_entries3 db =
   (*Array.iter (fun (k,v) -> Printf.printf "(%S,%S)\n" k v) a; *)
   OUnit.assert_equal 1 (Array.length a);
   OUnit.assert_equal (p ^ "sub2/hi2.txt", "sub2/hi2.txt") a.(0);
+  ()
+
+let test_range_entries4 db =
+  let dump a =
+    let () = Printf.printf "a:[\n" in
+    Array.iter (fun (k,v) -> Printf.printf "%S : %S\n" k v) a;
+    Printf.printf "]\n%!"
+  in
+  let prefix = "@" in
+  let () = load db [prefix ^ "xey001","XEY001"] in
+  let a2 = Bdb.range_entries prefix db None false None false 0 in
+  let () = dump a2 in
+  let () = eq_int "length should be 0" 0 (Array.length a2) in
   ()
 
 let test_get3_generic db =
@@ -282,6 +302,7 @@ let suite =
       "basic" >:: wrap test_basic;
       "cursor" >:: wrap test_cursor;
       "range" >:: wrap test_range;
+      "range2" >:: wrap test_range2;
       "unknown" >:: wrap test_unknown;
       "prefix_keys" >:: wrap test_prefix_keys;
       "null" >:: wrap test_null;
@@ -289,6 +310,7 @@ let suite =
       "range_entries" >:: wrap test_range_entries;
       "range_entries2" >:: wrap test_range_entries2;
       "range_entries3" >:: wrap test_range_entries3;
+      "range_entries4" >:: wrap test_range_entries4;
       "copy_from_cursor" >::: [
         "0" >:: wrap2 test_copy_from_cursor_0;
         "1" >:: wrap2 test_copy_from_cursor_1;

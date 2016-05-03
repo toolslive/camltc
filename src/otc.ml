@@ -24,18 +24,18 @@ let next_prefix prefix =
       | code -> Char.chr code, false in
   let rec inner s pos =
     let c, carry = next_char s.[pos] in
-    s.[pos] <- c;
+    Bytes.set s pos c;
     match carry, pos with
       | false, _ -> Some s
       | true, 0 -> None
       | true, pos -> inner s (pos - 1) in
-  let copy = String.copy prefix in
-  inner copy ((String.length copy) - 1)
+  let copy = Bytes.copy prefix in
+  inner copy ((Bytes.length copy) - 1)
 
 let prefix_match prefix k =
-  let pl = String.length prefix in
+  let pl = Bytes.length prefix in
   let rec ok i = (i = pl) || (prefix.[i] = k.[i] && ok (i+1)) in
-  String.length k >= pl && ok 0
+  Bytes.length k >= pl && ok 0
 
 module Bdb = struct
 
