@@ -1,4 +1,5 @@
 true: debug, annot
+true: thread
 true: package(oUnit)
 true: package(lwt)
 true: package(lwt.unix)
