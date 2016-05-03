@@ -151,6 +151,19 @@ let test_range_entries3 db =
   OUnit.assert_equal (p ^ "sub2/hi2.txt", "sub2/hi2.txt") a.(0);
   ()
 
+let test_range_entries4 db =
+  let dump a =
+    let () = Printf.printf "a:[\n" in
+    Array.iter (fun (k,v) -> Printf.printf "%S : %S\n" k v) a;
+    Printf.printf "]\n%!"
+  in
+  let prefix = "@" in
+  let () = load db [prefix ^ "xey001","XEY001"] in
+  let a2 = Bdb.range_entries prefix db None false None false 0 in
+  let () = dump a2 in
+  let () = eq_int "length should be 0" 0 (Array.length a2) in
+  ()
+
 let test_get3_generic db =
   let () = load db [("x","X");
                     ("xx", "XX");
@@ -297,6 +310,7 @@ let suite =
       "range_entries" >:: wrap test_range_entries;
       "range_entries2" >:: wrap test_range_entries2;
       "range_entries3" >:: wrap test_range_entries3;
+      "range_entries4" >:: wrap test_range_entries4;
       "copy_from_cursor" >::: [
         "0" >:: wrap2 test_copy_from_cursor_0;
         "1" >:: wrap2 test_copy_from_cursor_1;
