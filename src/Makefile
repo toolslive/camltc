@@ -9,6 +9,7 @@ clean:
 install:
 	$(OCAML_FIND) install camltc META \
 	  _build/camltc.cma \
+          _build/camltc.cmx \
 	  _build/camltc.cmxa \
 	  _build/camltc.cmi \
 	  _build/camltc.mli \
@@ -20,6 +21,8 @@ install:
 uninstall:
 	$(OCAML_FIND) remove camltc
 
+example:
+	cd ../example && \
+            ocamlbuild -use-ocamlfind demo.native demo.byte
 
 default: build
-
