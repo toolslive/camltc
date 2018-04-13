@@ -29,7 +29,7 @@ let dump () =
     "major: %i\n" ^^
     "minor: %i\n" ^^
     "patch: %i\n" ^^
-    "dependencies:%S\n")
+    "dependencies:\n%s\n")
     git_revision compile_time machine major minor patch dependencies
 
 let _ =

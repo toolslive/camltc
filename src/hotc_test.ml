@@ -87,7 +87,7 @@ let test_transaction db =
     )
     (function
       | Not_found ->
-         Lwt_log.debug "yes, this key was not found" >>= fun () ->
+         Logs_lwt.debug (fun m -> m "yes, this key was not found") >>= fun () ->
          Lwt.return ()
       | x -> Lwt.fail x
     )
