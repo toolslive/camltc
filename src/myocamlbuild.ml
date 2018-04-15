@@ -31,10 +31,28 @@ let git_revision = run_cmd "git describe --all --long --always --dirty"
 let tag_version  = run_cmd "git describe --tags --exact-match"
 let branch_version = run_cmd "git describe --all"
 let machine = run_cmd "uname -mnrpio"
-let dependencies = [
-  Printf.sprintf "Incubaid's tokyocabinet fork: %s"
-    (run_cmd "git submodule status 3rd-party/tokyocabinet")
-]
+
+let dependencies = ["lwt";"oUnit";"logs"]
+
+let tc_fork =
+  "libtc",
+  "1.4.48'",
+  Printf.sprintf "Incubaid's tokyocabinet fork: %s" (run_cmd "git submodule status 3rd-party/tokyocabinet")
+
+let list_dependencies () =
+  let query pkg =
+    let package = Findlib.query pkg in
+    (pkg, package.Findlib.version, package.Findlib.description)
+  in
+  let pkgs = List.map query dependencies in
+  let pkgs' = pkgs @ [tc_fork] in
+  let lines = List.map (fun (pkg, version, descr) ->
+    let tabs = if String.length pkg < 8 then "\t\t" else "\t" in
+    Printf.sprintf "%s%s%12s\t%s" pkg tabs version descr)
+    pkgs'
+  in
+  String.concat "\n" lines
+
 let time =
   let tm = Unix.gmtime (Unix.time()) in
   Printf.sprintf "%02d/%02d/%04d %02d:%02d:%02d UTC"
@@ -62,8 +80,7 @@ let make_version _ _ =
                 (fun ma mi -> (ma, mi, -1))
           with _ -> (-1,-1,-1)
     in
-    Printf.sprintf template git_revision time machine major minor patch
-      (String.concat "\\n" dependencies)
+    Printf.sprintf template git_revision time machine major minor patch (list_dependencies ())
   in
   Cmd (S [A "echo"; Quote(Sh cmd); Sh ">"; P "camltc_version.ml"])
 

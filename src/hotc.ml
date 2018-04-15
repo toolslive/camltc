@@ -79,8 +79,8 @@ module Hotc = struct
 
   let optimize t =
     Lwt_preemptive.detach (
-        fun() ->
-        Lwt.ignore_result( Lwt_log.debug "Optimizing database" );
+        fun () ->
+        Logs.info (fun m -> m "Optimizing database");
         Bdb.bdb_optimize t.bdb
       ) ()
 

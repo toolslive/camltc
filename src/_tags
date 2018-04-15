@@ -3,5 +3,5 @@ true: thread
 true: package(oUnit)
 true: package(lwt)
 true: package(lwt.unix)
-true: package(lwt.preemptive)
+true: package(logs.lwt)
 <test.*{byte,native}> : is_main
