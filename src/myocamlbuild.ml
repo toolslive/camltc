@@ -32,7 +32,7 @@ let tag_version  = run_cmd "git describe --tags --exact-match"
 let branch_version = run_cmd "git describe --all"
 let machine = run_cmd "uname -mnrpio"
 
-let dependencies = ["lwt";"oUnit";"logs"]
+let dependencies = ["lwt";"oUnit"]
 
 let tc_fork =
   "libtc",

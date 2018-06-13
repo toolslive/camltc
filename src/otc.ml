@@ -16,26 +16,30 @@ limitations under the License.
 
 (* use Hotc for highlevel locked access *)
 
-let next_prefix prefix =
+module B = Bytes
+
+let next_prefix (prefix: string): string option =
   let next_char c =
     let code = Char.code c + 1 in
     match code with
       | 256 -> Char.chr 0, true
       | code -> Char.chr code, false in
-  let rec inner s pos =
-    let c, carry = next_char s.[pos] in
-    Bytes.set s pos c;
+  let rec inner (s: bytes) (pos: int): string option =
+    let c, carry = next_char (B.get s pos) in
+    B.set s pos c;
     match carry, pos with
-      | false, _ -> Some s
+      | false, _ -> Some (B.to_string s)
       | true, 0 -> None
       | true, pos -> inner s (pos - 1) in
-  let copy = Bytes.copy prefix in
-  inner copy ((Bytes.length copy) - 1)
+  let copy = B.of_string prefix in
+  inner copy ((B.length copy) - 1)
 
-let prefix_match prefix k =
-  let pl = Bytes.length prefix in
-  let rec ok i = (i = pl) || (prefix.[i] = k.[i] && ok (i+1)) in
-  Bytes.length k >= pl && ok 0
+module S = String
+
+let prefix_match (prefix: string) (k: string) =
+  let pl = S.length prefix in
+  let rec ok i = (i = pl) || (S.get prefix i = S.get k i && ok (i+1)) in
+  S.length k >= pl && ok 0
 
 module Bdb = struct
 
@@ -134,7 +138,7 @@ module Bdb = struct
         raise exn
 
 
-  let delete_prefix bdb prefix =
+  let delete_prefix bdb (prefix: string) =
     let count = ref 0 in
     with_cursor bdb
       (fun bdb cur ->
@@ -253,7 +257,7 @@ module Bdb = struct
         true
       | BKey (last_, linc) ->
         begin
-          match String.compare key last_ with
+          match S.compare key last_ with
           | 0 -> linc
           | 1 -> false
           | -1 -> true
@@ -275,7 +279,7 @@ module Bdb = struct
       bdb (first : upper_border) (last_ : string) linc
       accumulate initial =
     let comp key =
-      match String.compare key last_ with
+      match S.compare key last_ with
       | 0 -> linc
       | 1 -> true
       | -1 -> false
@@ -296,7 +300,7 @@ module Bdb = struct
           (acc, false))
       initial
 
-  let range_entries prefix bdb first finc last_ linc max =
+  let range_entries (prefix: string) bdb first finc last_ linc max =
     let first  = match first with
       | Some x -> prefix ^ x
       | None   -> prefix in
@@ -311,7 +315,7 @@ module Bdb = struct
         end
       | Some x ->
         BKey ((prefix ^ x), linc) in
-    let pl = String.length prefix in
+    let pl = S.length prefix in
     let _, result =
       range_ascending
         bdb
@@ -323,15 +327,15 @@ module Bdb = struct
           then
             ((count, result), false)
           else
-            let l = String.length key in
-            let key2 = String.sub key pl (l - pl) in
+            let l = S.length key in
+            let key2 = S.sub key pl (l - pl) in
             (count + 1, (key2, value) :: result), true)
         (0, []) in
     Array.of_list (List.rev result)
 
 
   let rev_range_entries prefix bdb first finc last_ linc max =
-    let pl = String.length prefix in
+    let pl = S.length prefix in
     let _, result =
       range_descending
         bdb
@@ -355,8 +359,8 @@ module Bdb = struct
           then
             ((count, result), false)
           else
-            let l = String.length key in
-            let key2 = String.sub key pl (l - pl) in
+            let l = S.length key in
+            let key2 = S.sub key pl (l - pl) in
             (count + 1, (key2, value) :: result), true)
         (0, []) in
     result
