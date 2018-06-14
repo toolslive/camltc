@@ -1,0 +1,30 @@
+opam-version: "1.2"
+name: "camltc"
+version: "0.9.5"
+maintainer: "romain.slootmaekers@openvstorage.com"
+authors: ["Jan Doms" "Joost Damad" "Romain Slootmaekers" "Nicolas Trangez"]
+homepage: "http://github.com/toolslive/camltc"
+bug-reports: "http://github.com/toolslive/camltc/issues"
+dev-repo: "https://github.com/toolslive/camltc.git"
+build: [
+  ["git" "submodule" "init"]
+  ["git" "submodule" "update"]
+  ["%{make}%" "-C" "src"]
+]
+install: ["%{make}%" "-C" "src" "install"]
+remove: ["ocamlfind" "remove" "camltc"]
+depends: [
+  "ocamlfind" {build}
+  "ounit"
+  "lwt" {>= "3.2.0"}
+  "logs"
+  "ocamlbuild" {build}
+]
+depexts: [
+  [["debian"] ["git"]]
+  [["ubuntu"] ["git"]]
+]
+available: [
+  ocaml-version > "4.02.2" &
+  opam-version > "1.2.0"
+]
