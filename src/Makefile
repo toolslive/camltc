@@ -26,3 +26,7 @@ example:
             ocamlbuild -use-ocamlfind demo.native demo.byte
 
 default: build
+
+test: build
+	./test.native
+	./test.byte
