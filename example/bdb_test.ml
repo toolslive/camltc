@@ -3,19 +3,19 @@ open Printf
 module Bdb = Camltc.Bdb
 
 let nuke db fn =
-  Camltc.Hotc.bdb_close db;
-  Camltc.Hotc.bdb_delete db;
+  Bdb.close db;
+  Bdb.delete db;
   Sys.remove fn
 
 let () =
   let fn = "/tmp/test.tc" in
-  let db = Camltc.Hotc.bdb_create fn [] in
+  let db = Bdb.create fn [] in
   Bdb.put db "key" "value";
   Bdb.put db "key0" "value0";
   Bdb.put db "key1" "value1";
   Bdb.put db "key2" "value2";
   assert(Bdb.get db "key" = "value");
-  let cur = Camltc.Hotc.bdb_get_cursor db in
+  let cur = Bdb.get_cursor db in
   Bdb.last db cur;
   assert(Bdb.key db cur = "key2");
   assert(Bdb.value db cur = "value2");
@@ -28,5 +28,6 @@ let () =
     if i < n then
       Bdb.next db cur
   done;
-  printf "OK\n";
-  nuke db fn
+  nuke db fn;
+  assert(not (Sys.file_exists fn));
+  printf "OK\n"
