@@ -36,6 +36,7 @@ module Hotc : sig
   val bdb_close: bdb -> unit
   val bdb_delete: bdb -> unit
   val bdb_sync: bdb -> unit
+  val bdb_get_cursor: bdb -> bdbcur
 
   val delete: t -> unit Lwt.t
   val optimize: t -> unit Lwt.t

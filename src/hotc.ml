@@ -148,8 +148,8 @@ module Hotc = struct
       (fun () -> f bdb cursor)
       (fun () -> let () = Bdb._cur_delete cursor in Lwt.return ())
 
-
-
+  let bdb_get_cursor bdb =
+    Bdb._cur_make bdb
 
   let batch bdb (batch_size:int) (prefix:string) (start:string option) =
     transaction

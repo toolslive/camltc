@@ -115,7 +115,8 @@ module Hotc : sig
   val bdb_close: bdb -> unit
   val bdb_delete: bdb -> unit
   val bdb_sync: bdb -> unit
-  
+  val bdb_get_cursor: bdb -> bdbcur
+
   val get_bdb: t -> bdb
   val transaction :  t ->  (bdb -> 'd Lwt.t) -> 'd Lwt.t
   val with_cursor : bdb -> (bdb -> bdbcur -> 'a Lwt.t) -> 'a Lwt.t
