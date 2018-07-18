@@ -27,6 +27,12 @@ module Hotc : sig
   val read : t -> (bdb -> 'b Lwt.t) -> 'b Lwt.t
   val create: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
     string -> Otc.Bdb.opt list -> t Lwt.t
+
+  (** [create_bdb ~mode ~lcnum ~ncnum filename bdb_opts]
+      create, tune and open a bdb *)
+  val create_bdb: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
+    string -> Otc.Bdb.opt list -> bdb
+
   val delete: t -> unit Lwt.t
   val optimize: t -> unit Lwt.t
   val reopen: t -> (unit -> unit Lwt.t) -> int -> unit Lwt.t

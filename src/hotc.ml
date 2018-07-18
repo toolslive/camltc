@@ -70,6 +70,17 @@ module Hotc = struct
                     Lwt.return ()) >>= fun () ->
     Lwt.return res
 
+  let create_bdb
+      ?(mode = Bdb.default_mode)
+      ?(lcnum = 1024)
+      ?(ncnum = 512)
+      filename opts =
+    let bdb = Bdb._make () in
+    Bdb.setcache bdb lcnum ncnum;
+    Bdb.tune bdb opts;
+    Bdb._dbopen bdb filename mode;
+    bdb
+
   let close t =
     do_locked t (fun () -> _close_lwt t)
 
