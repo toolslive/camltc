@@ -79,7 +79,7 @@ module Hotc = struct
                     Lwt.return ()) >>= fun () ->
     Lwt.return res
 
-  let create_bdb
+  let bdb_create
       ?(mode = Bdb.default_mode)
       ?(lcnum = 1024)
       ?(ncnum = 512)

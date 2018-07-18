@@ -109,6 +109,13 @@ module Hotc : sig
     ?lcnum:int ->
     ?ncnum:int ->
     string -> Bdb.opt list -> t Lwt.t
+
+  val bdb_create: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
+    string -> Otc.Bdb.opt list -> bdb
+  val bdb_close: bdb -> unit
+  val bdb_delete: bdb -> unit
+  val bdb_sync: bdb -> unit
+  
   val get_bdb: t -> bdb
   val transaction :  t ->  (bdb -> 'd Lwt.t) -> 'd Lwt.t
   val with_cursor : bdb -> (bdb -> bdbcur -> 'a Lwt.t) -> 'a Lwt.t

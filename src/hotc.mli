@@ -30,7 +30,7 @@ module Hotc : sig
 
   (** [create_bdb ~mode ~lcnum ~ncnum filename bdb_opts]
       create, tune and open a bdb *)
-  val create_bdb: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
+  val bdb_create: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
     string -> Otc.Bdb.opt list -> bdb
 
   val bdb_close: bdb -> unit
