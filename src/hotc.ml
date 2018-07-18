@@ -44,6 +44,15 @@ module Hotc = struct
   let _close t =
     Bdb._dbclose t.bdb
 
+  let bdb_close db =
+    Bdb._dbclose db
+
+  let bdb_delete db =
+    Bdb._delete db
+
+  let bdb_sync db =
+    Bdb._dbsync db
+
   let _close_lwt t = Lwt.return (_close t)
 
   let sync t =
@@ -110,7 +119,6 @@ module Hotc = struct
   let _delete t =
     Bdb._dbclose t.bdb;
     Bdb._delete t.bdb
-
 
   let _delete_lwt t = Lwt.return(_delete t)
 
