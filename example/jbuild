@@ -1,0 +1,5 @@
+(jbuild_version 1)
+
+(executables
+ ((names (bdb_test))
+  (libraries (logs camltc))))
