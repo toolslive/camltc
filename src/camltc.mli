@@ -32,6 +32,14 @@ module Bdb : sig
   val get: bdb -> string -> string
   val get3: bdb -> string -> string
 
+  val oreader: int
+  val owriter: int
+  val ocreat: int
+  val otrunc: int
+  val onolck: int
+  val olcknb: int
+  val otsync: int
+
   (** create a bdb for standalone use *)
   val create: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
     string -> opt list -> bdb
