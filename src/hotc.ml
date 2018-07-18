@@ -44,15 +44,6 @@ module Hotc = struct
   let _close t =
     Bdb._dbclose t.bdb
 
-  let bdb_close db =
-    Bdb._dbclose db
-
-  let bdb_delete db =
-    Bdb._delete db
-
-  let bdb_sync db =
-    Bdb._dbsync db
-
   let _close_lwt t = Lwt.return (_close t)
 
   let sync t =
@@ -78,17 +69,6 @@ module Hotc = struct
                     _open res mode;
                     Lwt.return ()) >>= fun () ->
     Lwt.return res
-
-  let bdb_create
-      ?(mode = Bdb.default_mode)
-      ?(lcnum = 1024)
-      ?(ncnum = 512)
-      filename opts =
-    let bdb = Bdb._make () in
-    Bdb.setcache bdb lcnum ncnum;
-    Bdb.tune bdb opts;
-    Bdb._dbopen bdb filename mode;
-    bdb
 
   let close t =
     do_locked t (fun () -> _close_lwt t)
@@ -147,9 +127,6 @@ module Hotc = struct
     Lwt.finalize
       (fun () -> f bdb cursor)
       (fun () -> let () = Bdb._cur_delete cursor in Lwt.return ())
-
-  let bdb_get_cursor bdb =
-    Bdb._cur_make bdb
 
   let batch bdb (batch_size:int) (prefix:string) (start:string option) =
     transaction

@@ -385,4 +385,30 @@ module Bdb = struct
       | Some i -> i
     in
     _copy_from_cursor source cursor target count
+
+  (* functions for standalone use of the Bdb module ------------------------ *)
+
+  let create
+      ?(mode = default_mode)
+      ?(lcnum = 1024)
+      ?(ncnum = 512)
+      filename opts =
+    let bdb = _make () in
+    setcache bdb lcnum ncnum;
+    tune bdb opts;
+    _dbopen bdb filename mode;
+    bdb
+
+  let close db =
+    _dbclose db
+
+  let delete db =
+    _delete db
+
+  let sync db =
+    _dbsync db
+
+  let get_cursor bdb =
+    _cur_make bdb
+
 end
