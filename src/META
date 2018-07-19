@@ -1,6 +1,6 @@
 description = "camltc : ocaml bindings for tokyo cabinet"
 version = "0.9.4"
 exists_if = "camltc.cma,camltc.cmxa"
-requires = "unix, lwt, lwt.unix, lwt.log"
+requires = "unix, lwt, lwt.unix, logs.lwt"
 archive(byte) = "camltc.cma"
 archive(native) = "camltc.cmxa"
