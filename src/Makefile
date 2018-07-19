@@ -30,3 +30,7 @@ default: build
 test: build
 	./test.native
 	./test.byte
+
+doc: camltc.mli
+	mkdir -p doc
+	ocamldoc -html -d doc camltc.mli -I `ocamlfind query lwt`
