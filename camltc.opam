@@ -9,9 +9,9 @@ dev-repo: "https://github.com/toolslive/camltc.git"
 build: [
   ["git" "submodule" "init"]
   ["git" "submodule" "update"]
-  ["%{make}%" "-C" "src"]
+  [make "-C" "src"]
 ]
-install: ["%{make}%" "-C" "src" "install"]
+install: [make "-C" "src" "install"]
 remove: ["ocamlfind" "remove" "camltc"]
 depends: [
   "ocamlfind" {build}
