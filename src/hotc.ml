@@ -100,7 +100,6 @@ module Hotc = struct
     Bdb._dbclose t.bdb;
     Bdb._delete t.bdb
 
-
   let _delete_lwt t = Lwt.return(_delete t)
 
   let delete t = do_locked t (fun () -> _delete_lwt t)
@@ -128,9 +127,6 @@ module Hotc = struct
     Lwt.finalize
       (fun () -> f bdb cursor)
       (fun () -> let () = Bdb._cur_delete cursor in Lwt.return ())
-
-
-
 
   let batch bdb (batch_size:int) (prefix:string) (start:string option) =
     transaction

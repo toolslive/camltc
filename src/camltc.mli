@@ -22,7 +22,6 @@ val minor:int
 val patch:int
 val dependencies: string
 
-
 module Bdb : sig
   type bdb
   type bdbcur
@@ -32,6 +31,30 @@ module Bdb : sig
   val put : bdb -> string -> string -> unit
   val get: bdb -> string -> string
   val get3: bdb -> string -> string
+
+  val oreader: int
+  val owriter: int
+  val ocreat: int
+  val otrunc: int
+  val onolck: int
+  val olcknb: int
+  val otsync: int
+
+  (** create a bdb for standalone use *)
+  val create: ?mode:int -> ?lcnum:int -> ?ncnum:int ->
+    string -> opt list -> bdb
+
+  (** close given bdb *)
+  val close: bdb -> unit
+
+  (** delete given bdb (must have been closed before) *)
+  val delete: bdb -> unit
+
+  (** sync the given bdb *)
+  val sync: bdb -> unit
+
+  (** create a cursor for the given bdb *)
+  val get_cursor: bdb -> bdbcur
 
   val get3_generic : bdb -> string -> int -> int -> string
   (** [get3_generic bdb s off len] considers the substring of s
@@ -44,7 +67,6 @@ module Bdb : sig
     string option -> bool ->
     string option -> bool -> int ->
     string array
-
 
   val exists : bdb -> string -> bool
   val delete_prefix : bdb -> string -> int
