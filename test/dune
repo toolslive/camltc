@@ -1,0 +1,10 @@
+(executable
+ (name test)
+ (libraries lwt lwt.unix camltc oUnit)
+ (flags -w -6-27-33)
+)
+
+(alias
+ (name test)
+ (deps test.exe)
+)
