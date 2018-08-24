@@ -8,7 +8,6 @@ dev-repo: "https://github.com/toolslive/camltc.git"
 build: [
   ["git" "submodule" "init"]
   ["git" "submodule" "update"]
-  ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
 ]
 build-test: [["dune" "build" "@runtest" "-j" jobs]]

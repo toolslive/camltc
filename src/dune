@@ -35,7 +35,7 @@
   (echo let compile_time = \\\"$(date)\\\"
    echo let machine = \\\"$(uname -mnrpio)\\\"
    echo let git_revision = \\\"$(git describe --all --long --always --dirty)\\\"
-   echo let major, minor, patch = $(git describe --tags --exact-match | sed s/[.]/,/g | sed 's/camltc-//')
+   echo let major, minor, patch = $(git describe --tags --abbrev=0 | sed s/[.]/,/g | sed 's/camltc-//')
  >> %{targets}
    echo let dependencies = \\\"Incubaid\\\'s tokyocabinet fork: $(git submodule)\\\") > %{targets} ")
  )
