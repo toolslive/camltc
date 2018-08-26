@@ -1,3 +1,4 @@
+(include_subdirs unqualified)
 
 (library
  (name        camltc)
@@ -6,9 +7,8 @@
  (libraries unix lwt lwt.unix logs.lwt tc)
  (wrapped false)
  (flags -w -27)
- (library_flags -linkall)
  (c_names otc_wrapper)
- (c_flags -O2 -I ../../../src/3rd-party/tokyocabinet)
+ (c_flags -O2 -I 3rd-party/tokyocabinet)
 )
 
 (library
@@ -29,11 +29,12 @@
  )
 )
 
+
 (rule
  (targets camltc_version.ml)
  (action (bash "
   (echo let compile_time = \\\"$(date)\\\"
-   echo let machine = \\\"$(uname -mnrpio)\\\"
+   echo let machine = \\\"$(uname -mo)\\\"
    echo let git_revision = \\\"$(git describe --all --long --always --dirty)\\\"
    echo let major, minor, patch = $(git describe --tags --abbrev=0 | sed s/[.]/,/g | sed 's/camltc-//')
  >> %{targets}

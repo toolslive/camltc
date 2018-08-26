@@ -6,21 +6,18 @@ homepage: "http://github.com/toolslive/camltc"
 bug-reports: "http://github.com/toolslive/camltc/issues"
 dev-repo: "https://github.com/toolslive/camltc.git"
 build: [
-  ["git" "submodule" "init"]
-  ["git" "submodule" "update"]
   ["dune" "build" "-p" name "-j" jobs]
 ]
-build-test: [["dune" "build" "@runtest" "-j" jobs]]
+build-test: [
+  ["dune" "build" "@runtest" "-j" jobs]
+]
 depends: [
   "dune" {>= "1.1.0"}
   "lwt" {>= "3.2.0"}
   "logs"
   "ounit" {test}
 ]
-depexts: [
-  [["debian"] ["git"]]
-  [["ubuntu"] ["git"]]
-]
+
 available: [
   ocaml-version > "4.02.3"
 ]
