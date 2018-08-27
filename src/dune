@@ -40,4 +40,5 @@
  >> %{targets}
    echo let dependencies = \\\"Incubaid\\\'s tokyocabinet fork: $(git submodule)\\\") > %{targets} ")
  )
+ (mode fallback)
 )
