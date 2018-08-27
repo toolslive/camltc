@@ -21,3 +21,6 @@ uninstall: build
 reinstall:
 	$(MAKE) uninstall
 	$(MAKE) install
+
+release:
+	./opam-release.sh
