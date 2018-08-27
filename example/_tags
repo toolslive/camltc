@@ -1,4 +1,0 @@
-true:debug,annot
-true:package(lwt)
-true:package(camltc)
-true:thread

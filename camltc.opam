@@ -5,25 +5,20 @@ authors: ["Jan Doms" "Joost Damad" "Romain Slootmaekers" "Nicolas Trangez"]
 homepage: "http://github.com/toolslive/camltc"
 bug-reports: "http://github.com/toolslive/camltc/issues"
 dev-repo: "https://github.com/toolslive/camltc.git"
+license: "Apache-2.0"
 build: [
-  ["git" "submodule" "init"]
-  ["git" "submodule" "update"]
-  [make "-C" "src"]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
-install: [make "-C" "src" "install"]
-remove: ["ocamlfind" "remove" "camltc"]
+build-test: [
+  ["dune" "build" "@runtest" "-j" jobs]
+]
 depends: [
-  "ocamlfind" {build}
-  "ounit"
+  "dune" {>= "1.1.0"}
   "lwt" {>= "3.2.0"}
   "logs"
-  "ocamlbuild" {build}
+  "ounit" {test}
 ]
-depexts: [
-  [["debian"] ["git"]]
-  [["ubuntu"] ["git"]]
-]
+
 available: [
-  ocaml-version > "4.02.2" &
-  opam-version > "1.2.0"
+  ocaml-version > "4.02.3"
 ]
