@@ -1,4 +1,4 @@
-.PHONY: test build examples clean
+.PHONY: test build examples clean install uninstall reinstall
 
 build:
 	dune build @install
@@ -11,3 +11,13 @@ examples:
 
 clean:
 	dune clean
+
+install: build
+	dune install
+
+uninstall: build
+	dune uninstall
+
+reinstall:
+	$(MAKE) uninstall
+	$(MAKE) install
