@@ -7,3 +7,5 @@ Notes:
   * only the btree functions were wrapped, because that's what Arakoon needed.
 
   * License: ALv2 (see LICENSE for details)
+
+Api documentation can be found at: https://toolslive.github.io/camltc/
