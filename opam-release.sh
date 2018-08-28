@@ -3,6 +3,9 @@
 set -e
 set -u
 
+git submodule init
+git submodule update
+
 VERSION_FILE=_build/default/src/camltc_version.ml
 ## Create a tarball from the current checkout.
 NAME=$(git describe --tags)
