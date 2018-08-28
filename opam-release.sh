@@ -11,7 +11,7 @@ if ! git describe --tags --exact-match 2> /dev/null; then
 fi
 echo "Creating release for tag: ${NAME}"
 
-rm ${VERSION_FILE}
+rm -f ${VERSION_FILE}
 dune build
 
 # Checkout a shallow copy, including submodules.
