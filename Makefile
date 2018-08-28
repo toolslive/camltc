@@ -35,7 +35,7 @@ gh-pages: doc
 	git -C .gh-pages clean -dxf
 	cp  -r _build/default/_doc/_html/* .gh-pages
 	git -C .gh-pages add .
-	git -C .gh-pages config user.email 'docs@aws-s3'
+	git -C .gh-pages config user.email 'toolslive@yahoo.com'
 	git -C .gh-pages commit -m "Update documentation"
 	git -C .gh-pages push origin gh-pages -f
 	rm -rf .gh-pages
