@@ -23,5 +23,5 @@ URL=$(git remote get-url origin)
 rm -rf ${NAME}
 git clone ${URL} --single-branch --branch ${NAME} --depth=1 --shallow-submodules --recurse-submodules ${NAME}
 cp ${VERSION_FILE} ${NAME}/src
-tar czf ${NAME}.tar.gz --exclude-vcs --exclude-vcs-ignores ${NAME}
+tar cf ${NAME}.tar.gz -I 'gzip -9' --exclude-vcs --exclude-vcs-ignores ${NAME}
 rm -rf ${NAME}
