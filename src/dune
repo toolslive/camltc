@@ -20,9 +20,10 @@
 
 (rule
  (targets libtc_stubs.a dlltc_stubs.so)
+ (deps (source_tree 3rd-party))
  (action
   (bash "
-   (../../../src/3rd-party/tokyocabinet/configure --disable-bzip --disable-zlib
+   (3rd-party/tokyocabinet/configure --disable-bzip --disable-zlib
    make libtokyocabinet.so libtokyocabinet.a -j $(nproc)) > /dev/null 2>&1
    cp libtokyocabinet.so dlltc_stubs.so
    cp libtokyocabinet.a libtc_stubs.a ")
