@@ -34,7 +34,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 #include "tcbdb.h"
 
-#define Some_val(v) Field(v,0)
+/* #define Some_val(v) Field(v,0) */
 #define Val_none Val_int(0)
 
 // TODO: retrieve rich tc error for exceptions
@@ -64,14 +64,14 @@ static struct custom_operations bdbcur_ops = {
 /* Allocating a Caml custom block to hold the given TCBDB * */
 static value alloc_bdb(TCBDB * db)
 {
-  value v = alloc_custom(&bdb_ops, sizeof(TCBDB *), 0, 1);
+  value v = caml_alloc_custom(&bdb_ops, sizeof(TCBDB *), 0, 1);
   Bdb_val(v) = db;
   return v;
 }
 
 static value alloc_bdbcur(BDBCUR * cur)
 {
-  value v = alloc_custom(&bdbcur_ops, sizeof(BDBCUR *), 0, 1);
+  value v = caml_alloc_custom(&bdbcur_ops, sizeof(BDBCUR *), 0, 1);
   Bdbcur_val(v) = cur;
   return v;
 }
@@ -618,7 +618,7 @@ value bdb_key_count(value bdb)
 {
   CAMLparam1(bdb);
   uint64_t count = tcbdbrnum( Bdb_val(bdb) );
-  CAMLreturn ( copy_int64(count) );
+  CAMLreturn ( caml_copy_int64(count) );
 }
 
 void bdb_tune(value bdb, /* value lmemb, value nmemb, value bnum, value apow, value fpow, */ value opts) {
